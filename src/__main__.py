@@ -4,7 +4,8 @@ from .parser.ArgParser import ArgsParser
 
 def main() -> None:
     try:
-        ArgsParser.check_args(sys.argv)
+        args_parser = ArgsParser(sys.argv)
+        args_parser.parse()
     except Exception as error:
         print(error)
 

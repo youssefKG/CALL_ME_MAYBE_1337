@@ -20,5 +20,5 @@ class Parser:
 
     def __validate_input_file(self) -> None:
         input_file_content: str = pathlib.Path(self.__args_parser.get_input_file).read_text()
-        prompts: PromptJson = PromptJson.model_validate_json(input_file_content)
+        prompts: list[PromptJson] = PromptJson.model_validate_json(input_file_content)
         print(prompts)

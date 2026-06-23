@@ -89,8 +89,7 @@ class ArgsParser:
     def get_functions_definition_file(self) -> str:
         return cast(str, self.__functions_definition_file)
 
-    # ------------------------------ Errors ---------------------------
-
+    # ------------------------------ start Errors ---------------------------
     def __raise_unknown_option(self, option: str) -> None:
         raise ArgsError(
             f"Error: Unknown option '{option}'.\n"
@@ -109,3 +108,4 @@ class ArgsParser:
 
     def __raise_duplicated_option(self, option: str) -> None:
         raise ArgsError(f"raise duplicated option {option}")
+    # ------------------------------ End Errors ---------------------------

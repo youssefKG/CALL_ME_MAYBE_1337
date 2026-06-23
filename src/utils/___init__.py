@@ -1,3 +1,4 @@
-from .singleton import Singleton
+from .Singleton import Singleton
+from src.utils.FileChecker import FileChecker
 
-__all__ = ["Singleton"]
+__all__ = ["Singleton", "FileChecker"]

@@ -1,4 +1,4 @@
-from .singleton import Singleton
+from .Singleton import Singleton
 
 
 class File(Singleton):

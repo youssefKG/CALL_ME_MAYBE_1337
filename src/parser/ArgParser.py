@@ -2,6 +2,7 @@ from enum import Enum
 from typing import cast
 from src.utils.FileChecker import FileChecker
 
+
 class ArgsError(Exception):
     pass
 
@@ -108,4 +109,5 @@ class ArgsParser:
 
     def __raise_duplicated_option(self, option: str) -> None:
         raise ArgsError(f"raise duplicated option {option}")
+
     # ------------------------------ End Errors ---------------------------

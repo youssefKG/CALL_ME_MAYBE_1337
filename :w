@@ -1,6 +1,0 @@
-from pydantic import BaseModel, TypeAdapter
-
-class PromptJson(BaseModel):
-    prompt: str
-
-JsonPromptsModel = TypeAdapter(list[PromptJson])

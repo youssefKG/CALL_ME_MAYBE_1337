@@ -1,8 +1,8 @@
 import pathlib
 
 from .ArgParser import ArgsParser
-from src.models.PromptJson import PromptJson
-
+from src.models.PromptJson import PromptJsonModel
+from pydantic import TypeAdapter
 
 
 class Parser:
@@ -14,11 +14,15 @@ class Parser:
         self.__validate_input_file()
         self.__validate_functions_definition_file()
 
-
     def __validate_functions_definition_file(self) -> None:
         pass
 
     def __validate_input_file(self) -> None:
-        input_file_content: str = pathlib.Path(self.__args_parser.get_input_file).read_text()
-        prompts: list[PromptJson] = PromptJson.model_validate_json(input_file_content)
+        input_file_content: str = pathlib.Path(
+            self.__args_parser.get_input_file
+        ).read_text()
+        json_prompt_adapter = TypeAdapter(list[PromptJsonModel])
+        prompts: list[PromptJsonModel] = json_prompt_adapter.validate_json(
+            input_file_content
+        )
         print(prompts)

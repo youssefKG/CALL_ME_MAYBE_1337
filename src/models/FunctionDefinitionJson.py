@@ -13,7 +13,7 @@ class FunctionReturnModel(BaseModel):
     type: str
 
 
-class FunctionDefnitionJsonModel(BaseModel):
+class FunctionDefnitionModel(BaseModel):
     name: str
     description: str
     parametres: list[FunctionParametresModel]

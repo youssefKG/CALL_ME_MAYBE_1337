@@ -8,7 +8,7 @@ class ArgsError(Exception):
 
 
 class DefaultFilePath(str, Enum):
-    INPUT_FILE = "data/input/functions_definition.json"
+    INPUT_FILE = "../../data/input/function_calling_tests.json"
     OUTPUT_FILE = "data/output/function_calls.json"
 
 

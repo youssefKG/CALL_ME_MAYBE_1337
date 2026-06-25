@@ -1,18 +1,16 @@
-import json
 from pathlib import Path
 
-from models.FunctionDefinitionJson import FunctionDefnitionModel
+from src.models.FunctionDefinitionJson import FunctionDefinitionModel
 
 from .ArgParser import ArgsParser
-from src.models.PromptJson import PromptJsonModel
-from pydantic import TypeAdapter
+from src.models.PromptJson import PromptsRootModel
 
 
 class Parser:
     def __init__(self, args: list[str]) -> None:
         self.__args_parser: ArgsParser = ArgsParser(args)
-        self.__prompts: set[str] = set()
-        self.__function_defintions: list[str]
+        self.__prompts: PromptsRootModel
+        self.__function_defintions: FunctionDefinitionModel
 
     def parse(self) -> None:
         self.__args_parser.parse()
@@ -21,26 +19,25 @@ class Parser:
 
     def __parse_functions_definition(self) -> None:
         functions_definition_file_content: str = Path(
-            self.__args_parser.get_output_file
+            self.__args_parser.get_functions_definition_file
         ).read_text()
-        function_defintion_model_adapter = TypeAdapter(list[FunctionDefnitionModel])
-        function_definions: list[FunctionDefnitionModel] = (
-            function_defintion_model_adapter.validate_json(
-                self.__args_parser.get_functions_definition_file
-            )
+        function_definions_validator = FunctionDefinitionModel.model_validate_json(
+            functions_definition_file_content
         )
+        self.__function_defintions = function_definions_validator.model_dump()
 
     def __parse_prompts(self) -> None:
+        print(self.__args_parser.get_input_file)
         input_file_content: str = Path(
             self.__args_parser.get_input_file
         ).read_text()  # read the content
-        json_prompt_adapter = TypeAdapter(list[PromptJsonModel])
-        prompts: list[PromptJsonModel] = json_prompt_adapter.validate_json(
-            input_file_content
-        )
-        for prompt in prompts:
-            self.__prompts.add(prompt.prompt)
+        prompts_validator = PromptsRootModel.model_validate_json(input_file_content)
+        self.__prompts = prompts_validator.model_dump()
 
     @property
-    def get_prompts(self) -> set[str]:
+    def get_prompts(self) -> PromptsRootModel:
         return self.__prompts
+
+    @property
+    def get_functions_defintions(self) -> FunctionDefinitionModel:
+        return self.__function_defintions

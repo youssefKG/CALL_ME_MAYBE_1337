@@ -1,20 +1,16 @@
-from pydantic import BaseModel
+from typing import Literal
+from pydantic import BaseModel, RootModel
 
 
-class FunctionParametresModel(BaseModel):
-    type: str
+class TypeSpec(BaseModel):
+    type: Literal["string", "number"]
 
 
-class FunctionArgumentModel(BaseModel):
-    type: str
-
-
-class FunctionReturnModel(BaseModel):
-    type: str
-
-
-class FunctionDefnitionModel(BaseModel):
+class FunctionDefinition(BaseModel):
     name: str
     description: str
-    parametres: list[FunctionParametresModel]
-    returns: FunctionReturnModel
+    parameters: dict[str, TypeSpec]
+    returns: TypeSpec
+
+
+class FunctionDefinitionModel(RootModel[list[FunctionDefinition]]): ...

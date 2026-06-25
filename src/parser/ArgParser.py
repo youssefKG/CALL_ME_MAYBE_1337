@@ -8,8 +8,8 @@ class ArgsError(Exception):
 
 
 class DefaultFilePath(str, Enum):
-    INPUT_FILE = "../../data/input/function_calling_tests.json"
-    OUTPUT_FILE = "data/output/function_calls.json"
+    INPUT_FILE = "data/input/function_calling_tests.json"
+    FUNCTION_DEFINTION_FILE = "data/input/functions_definition.json"
 
 
 class ArgsParser:
@@ -30,7 +30,7 @@ class ArgsParser:
             idx += 2
         self.__set_default_values()
 
-    def __set_file(self, option: str, file_path: str | None) -> None:
+    def __set_file(self, option: str, file_path: str | None = None) -> None:
         match option:
             case "--input":
                 self.__set_input_file(file_path)
@@ -41,21 +41,23 @@ class ArgsParser:
             case _:
                 self.__raise_unknown_option(option)
 
-    def __set_functions_definition_file(self, file_path: str | None) -> None:
+    def __set_functions_definition_file(
+        self, file_path: str | None = DefaultFilePath.FUNCTION_DEFINTION_FILE
+    ) -> None:
         if self.__functions_definition_file is not None:
             self.__raise_duplicated_option("--functions_definition")
         if file_path is None:
-            self.__raise_missing_value_after_option("--functions-definition")
+            self.__raise_missing_value_after_option("--input")
+            return
+        FileChecker.check_file_path_is_exist(file_path)
+        FileChecker.check_file_is_readable(file_path)
         self.__functions_definition_file = file_path
 
-    def __set_output_file(
-        self, file_path: str | None = DefaultFilePath.OUTPUT_FILE.value
-    ) -> None:
+    def __set_output_file(self, file_path: str | None = None) -> None:
         if self.__output_file is not None:
             self.__raise_duplicated_option("output")
         if file_path is None:
-            self.__raise_missing_value_after_option("--output")
-            return
+            return self.__raise_missing_value_after_option("--output")
         self.__output_file = file_path
 
     def __set_input_file(
@@ -64,8 +66,7 @@ class ArgsParser:
         if self.__input_file_file is not None:
             self.__raise_duplicated_option("--input")
         if file_path is None:
-            self.__raise_missing_value_after_option("--input")
-            return
+            return self.__raise_missing_value_after_option("--input")
         FileChecker.check_file_path_is_exist(file_path)
         FileChecker.check_file_is_readable(file_path)
         self.__input_file_file = file_path

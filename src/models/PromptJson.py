@@ -1,5 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
-class PromptJsonModel(BaseModel):
+class PromptModel(BaseModel):
     prompt: str
+
+
+class PromptsRootModel(RootModel[list[PromptModel]]): ...

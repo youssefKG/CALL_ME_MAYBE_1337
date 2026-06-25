@@ -1,14 +1,15 @@
 import sys
 
-from .parser.Parser import Parser
+from pydantic import ValidationError
+
+from llm_model.model import Model
+from src.parser.Parser import Parser
+
+# from .llm_model.model import Model
 
 
 def main() -> None:
-    try:
-        parser: Parser = Parser(sys.argv)
-        parser.parse()
-    except Exception as error:
-        print(error)
+    model = Model()
 
 
 if __name__ == "__main__":

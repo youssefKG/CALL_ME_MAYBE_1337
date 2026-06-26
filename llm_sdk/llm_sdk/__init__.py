@@ -19,7 +19,6 @@ logging.set_verbosity_error()  # keep the console clean
 
 class Small_LLM_Model:
     """Utility class wrapping a lightweight Hugging Face causal-LM for fast, low-memory experimentation.
-
     Parameters
     ----------
     model_name: str, default="Qwen/Qwen3-0.6B"
@@ -53,7 +52,11 @@ class Small_LLM_Model:
         self._device = device
 
         if dtype is None:
-            dtype = torch.float16 if self._device in ["cuda", "mps", "cpu"] else torch.float32
+            dtype = (
+                torch.float16
+                if self._device in ["cuda", "mps", "cpu"]
+                else torch.float32
+            )
         self._dtype = dtype
 
         # --- load tokenizer & model -------------------------------------------------

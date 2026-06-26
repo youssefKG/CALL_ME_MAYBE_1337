@@ -1,7 +1,6 @@
 class Prompt:
     def __init__(self, functions_calls: str) -> None:
-        self.prompt_template: str =
-        """
+        self.prompt_template: str = """
         You are a function caller.
         Functions:
         {FUNCTIONS}
@@ -30,8 +29,5 @@ class Prompt:
         Output:
         """.replace("{FUNCTIONS}", functions_calls)
 
-
     def generate(self, user_prompt: str) -> str:
         return self.prompt_template.replace("{USER_PROMPT}", user_prompt)
-
-

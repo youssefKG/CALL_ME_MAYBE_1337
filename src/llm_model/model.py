@@ -1,7 +1,7 @@
 from llm_sdk.llm_sdk import Small_LLM_Model
 from src.utils.Singleton import Singleton
-import torch.nn.functional as F
 import torch
+from typing import cast
 
 
 class Model(Small_LLM_Model, Singleton):
@@ -18,10 +18,11 @@ class Model(Small_LLM_Model, Singleton):
             model_name, device=device, dtype=dtype, trust_remote_code=trust_remote_code
         )
 
-    def get_next_token(self, prompt: str) -> None:
-        data_ids = self.encode(prompt).flatten().tolist()
+    def get_next_token(self, prompt: str) -> str:
+        data_ids: list[int] = [int(x) for x in self.encode(prompt).flatten()]
+        print(data_ids)
         logits: list[float] = self.get_logits_from_input_ids(data_ids)
-        probabilities = F.softmax(logits, dim=-1)
-        next_token_id = torch.argmax(probabilities).item()
-        token = self.decode(next_token_id)
-        print(token)
+        prob_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
+        print(prob_ids)
+        next_token: str = self.decode(torch.tensor(prob_ids))
+        return next_token

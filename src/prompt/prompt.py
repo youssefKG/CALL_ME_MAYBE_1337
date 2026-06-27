@@ -1,6 +1,6 @@
 class Prompt:
     def __init__(self, functions_calls: str) -> None:
-        self.prompt_template: str = """
+        self.__prompt_template: str = """
         You are a function caller.
         Functions:
         {FUNCTIONS}

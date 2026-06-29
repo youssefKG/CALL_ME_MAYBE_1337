@@ -13,4 +13,5 @@ class FunctionDefinition(BaseModel):
     returns: TypeSpec
 
 
-class FunctionDefinitionModel(RootModel[list[FunctionDefinition]]): ...
+class FunctionDefinitionModel(RootModel[list[FunctionDefinition]]):
+    pass

@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from src.models.FunctionDefinitionJson import FunctionDefinitionModel
+from src.Models.FunctionDefinitionJson import FunctionDefinitionModel
 
 from .ArgParser import ArgsParser
-from src.models.PromptJson import PromptsRootModel
+from src.Models.PromptJson import PromptsRootModel
 
 
 class Parser:
@@ -27,11 +27,12 @@ class Parser:
         self.__function_defintions = function_definions_validator.model_dump()
 
     def __parse_prompts(self) -> None:
-        print(self.__args_parser.get_input_file)
         input_file_content: str = Path(
             self.__args_parser.get_input_file
         ).read_text()  # read the content
-        prompts_validator = PromptsRootModel.model_validate_json(input_file_content)
+        prompts_validator = PromptsRootModel.model_validate_json(
+            input_file_content
+        )  # validate the
         self.__prompts = prompts_validator.model_dump()
 
     @property

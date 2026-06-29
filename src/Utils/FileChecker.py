@@ -1,11 +1,13 @@
 import os
 
+
 class FileError(Exception):
     pass
-    
+
+
 class FileChecker:
 
-    @classmethod 
+    @classmethod
     def check_file_is_readable(cls, file_path: str) -> None:
         is_readable: bool = os.access(file_path, os.R_OK)
         if not is_readable:

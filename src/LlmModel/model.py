@@ -1,6 +1,6 @@
 from llm_sdk.llm_sdk import Small_LLM_Model
-from src.utils.Singleton import Singleton
-from Enums.ModelState import ModelState
+from src.Utils.Singleton import Singleton
+from src.Enums.ModelState import ModelState
 import torch
 
 

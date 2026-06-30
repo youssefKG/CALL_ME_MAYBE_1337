@@ -1,6 +1,7 @@
 from llm_sdk.llm_sdk import Small_LLM_Model
 from src.Utils.Singleton import Singleton
 from src.Enums.ModelState import ModelState
+from src.Enums.JsonState import JsonState
 import torch
 
 
@@ -21,6 +22,7 @@ class Model(Small_LLM_Model, Singleton):
             trust_remote_code=trust_remote_code,  # constructor
         )
         self.model_state: ModelState = ModelState.SelectingFunctionName
+        self.json_state: 
 
     def get_next_token(self, prompt: str) -> str:
         data_ids: list[int] = [int(x) for x in self.encode(prompt).flatten()]
@@ -28,3 +30,15 @@ class Model(Small_LLM_Model, Singleton):
         prob_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
         next_token: str = self.decode(torch.tensor(prob_ids))
         return next_token
+
+    def next_valid_token(self, current_text: str) -> set[str]:
+        valid_tokens: set[str] = set()
+
+        if not current_text:
+            return {"{"}
+
+        last_character: str = current_text[-1]
+        if last_character.isdigit():
+            return {"0", "1", "3", "4", "5", "6", "7", "8", "9"}
+
+        return valid_tokens

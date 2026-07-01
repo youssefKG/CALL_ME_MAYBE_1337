@@ -24,7 +24,7 @@ class Model(Small_LLM_Model, Singleton):
         self.model_state: ModelState = ModelState.SelectingFunctionName
         self.json_state: 
 
-    def get_next_token(self, prompt: str) -> str:
+    def get_next_token(self, prompt: str, next_preditect_token: set[str]) -> str:
         data_ids: list[int] = [int(x) for x in self.encode(prompt).flatten()]
         logits: list[float] = self.get_logits_from_input_ids(data_ids)
         prob_ids = torch.argmax(torch.tensor(logits), dim=-1).item()

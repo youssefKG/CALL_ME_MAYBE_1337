@@ -1,11 +1,4 @@
-from dataclasses import dataclass
-
-
-@dataclass
-class PredictionResult:
-    is_found: bool
-    possible_predicted_tokens: set[str]
-    predicted_token: str
+from .prediction_result import PredictionResult
 
 
 class FnNamePredictor:
@@ -15,7 +8,7 @@ class FnNamePredictor:
     def predict(self, pre_generate_name: str) -> PredictionResult:
         next_predicted_tokens: set[str] = set({})
         fn_names_that_start_with_pregenerated: set[str] = (
-            self.__fn_names_that_start_with_pregerated_name(pre_generate_name)
+            self.__fn_names_that_start_with_pregenerated_name(pre_generate_name)
         )
         if len(fn_names_that_start_with_pregenerated) == 1:
             predicted_fn_name: str = fn_names_that_start_with_pregenerated.pop()
@@ -33,7 +26,7 @@ class FnNamePredictor:
             predicted_token="",
         )
 
-    def __fn_names_that_start_with_pregerated_name(
+    def __fn_names_that_start_with_pregenerated_name(
         self, pre_generate_name: str
     ) -> set[str]:
         fn_names: set[str] = set({})
@@ -53,6 +46,7 @@ class FnNamePredictor:
         return tokens
 
 
+# TEST
 def test_predirect_token_for_fn_names(pregenerated_fn_name: str) -> None:
     fn_names: set[str] = set(
         {
@@ -75,3 +69,4 @@ def test_predirect_token_for_fn_names(pregenerated_fn_name: str) -> None:
 
 if __name__ == "__main__":
     test_predirect_token_for_fn_names("fn_")
+    test_predirect_token_for_fn_names("f")

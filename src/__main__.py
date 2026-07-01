@@ -12,7 +12,6 @@ def main() -> None:
     print(file_content)
     print(path_to_tokinizer)
 
-
     # parser: Parser = Parser(sys.argv)
     # parser.parse()
     # promt: Prompt = Prompt(parser.get_functions_defintions)

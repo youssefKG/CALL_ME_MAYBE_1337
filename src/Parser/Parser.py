@@ -30,6 +30,7 @@ class Parser:
         input_file_content: str = Path(
             self.__args_parser.get_input_file
         ).read_text()  # read the content
+        print(input_file_content)
         prompts_validator = PromptsRootModel.model_validate_json(
             input_file_content
         )  # validate the

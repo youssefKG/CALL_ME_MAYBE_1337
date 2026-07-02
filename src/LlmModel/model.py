@@ -42,3 +42,8 @@ class Model(Small_LLM_Model, Singleton):
             return {"0", "1", "3", "4", "5", "6", "7", "8", "9"}
 
         return valid_tokens
+
+
+
+    def __init_cache(self) -> None:
+

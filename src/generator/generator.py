@@ -20,41 +20,43 @@ class Generator:
             .set_fns_def_static_prompt()
             .build()
         )
+        self.__init_cache()
 
-    def init_cache(self) -> None:
+    
+    def generate_prompt_ids(self, prompt: str) -> callable:
+        text_ids: list[int] = list()
+        fns_def_dynamic_prompt: str = (
+                self.__prompt_generator.get_fns_def_dynamic_prompt(prompt)
+        )
+        fns_def_dynamic_prompt_ids: list[int] = self.__model.encode(fns_def_dynamic_prompt)
+        fns_static_prompts_ids: list[int] = self.__cache.get_params_ids
+        text_ids +=  fns_def_dynamic_prompt_ids + fns_static_prompts_ids
+
+        def generate(token_id: id) -> list[int]:
+            nonlocal text_ids
+            text_ids.append(token_id)
+            return text_ids
+
+
+    def get_next_token(self, text_ids: list[int]) -> tuple[str, int]:
+        res: int
+        logits: list[float] = self.__model.get_logits(text_ids)
+        props_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
+        token: str = self.__model.decode(props_ids)
+        token_id: int = self.__model.encode(token)[0]
+        return (token, token_id)
+
+
+    @property
+    def next_prompt(self) -> str:
+        return next(self.__prompt_generator.next_prompt)
+
+    def __init_cache(self) -> None:
         encoded_fns_def_names_ids: list[int] = self.__model.encode(
             self.__prompt_generator.get_fn_params_static_prompt
         )
-        print(self.__prompt_generator.get_fns_def_static_prompt)
         encoded_fn_def_params_ids: list[int] = self.__model.encode(
             self.__prompt_generator.get_fns_def_static_prompt
         )
         self.__cache.set_fns_def_static_prompt_ids(encoded_fns_def_names_ids)
         self.__cache.set_fn_params_static_prompt_ids(encoded_fn_def_params_ids)
-
-    @property
-    def get_fns_def_static_prompt(self) -> None:
-        return self.__cache.get_params_ids
-    
-    def generate_prompt_ids(self, text: str | None = None) -> list[int]:
-        text_ids: list[int] = []
-        if text is None:
-            text_ids = []
-        def generate() -> list[int]:
-            nonlocal text_ids
-            prompt: str = next(self.__prompt_generator.next_prompt)
-            fns_def_dynamic_prompt: str = (
-                    self.__prompt_generator.get_fns_def_dynamic_prompt(prompt)
-            )
-            fns_def_dynamic_prompt_ids: list[int] = self.__model.encode(fns_def_dynamic_prompt)
-            fns_static_prompts_ids: list[int] = self.__cache.get_params_ids
-            text_ids +=  fns_def_dynamic_prompt_ids + fns_static_prompts_ids
-            return text_ids
-
-
-    def get_next_token(self, text_ids: list[int]) -> int:
-        res: int
-        logits: list[float] = self.__model.get_logits(text_ids)
-        props_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
-        token: str = self.__model.decode(props_ids)
-        return token

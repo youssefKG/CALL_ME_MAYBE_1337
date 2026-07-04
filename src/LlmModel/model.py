@@ -27,8 +27,9 @@ class Model(Singleton, Small_LLM_Model):
             trust_remote_code=trust_remote_code,  # constructor
         )
 
-    def my_encode(self, text: str) -> list[int]:
-        text_ids: list[int] = [int(x) for x in self.encode(text).flatten()]
+    @override
+    def encode(self, text: str) -> list[int]:
+        text_ids: list[int] = [int(x) for x in super().encode(text).flatten()]
         return text_ids
 
     def get_logits(self, input_ids: list[int]) -> list[float]:
@@ -36,18 +37,6 @@ class Model(Singleton, Small_LLM_Model):
         return logits
 
 
-#
-# def get_next_token(self, prompt: str, next_preditect_token: set[str]) -> str:
-#     return next_token
-#
-# def next_valid_token(self, current_text: str) -> set[str]:
-#     valid_tokens: set[str] = set()
-#
-#     if not current_text:
-#         return {"{"}
-#
-#     last_character: str = current_text[-1]
-#     if last_character.isdigit():
-#         return {"0", "1", "3", "4", "5", "6", "7", "8", "9"}
-#
-#     return valid_tokens
+    @override
+    def decode(self, text_ids: list[int]) -> int:
+        return super().decode(text_ids)

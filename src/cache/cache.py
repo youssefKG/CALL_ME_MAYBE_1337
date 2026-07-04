@@ -1,4 +1,4 @@
-from src.utils.Singleton import Singleton
+from src.utils.singleton import Singleton
 
 
 class Cache(Singleton):

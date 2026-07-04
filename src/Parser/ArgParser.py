@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import cast
-from src.Utils.FileChecker import FileChecker
+from src.utils.FileChecker import FileChecker
 
 
 class ArgsError(Exception):

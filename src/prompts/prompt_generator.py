@@ -15,19 +15,9 @@ class PromptType(Enum):
     - Return ONLY the function name.
     - Do NOT return JSON.
     - Do NOT explain.
-    - Do NOT output markdown.
-    - Do NOT output any other text.
 
     Functions:
-
     {FUNCTIONS}
-
-    Examples:
-
-    Functions:
-    - fn_add_numbers: Adds two numbers.
-    - fn_greet: Greets a person by name.
-    - fn_reverse_string: Reverses a string.
 
     User:
     What is the sum of 2 and 3?
@@ -35,21 +25,11 @@ class PromptType(Enum):
     Output:
     fn_add_numbers
 
-    Functions:
-    - fn_add_numbers: Adds two numbers.
-    - fn_greet: Greets a person by name.
-    - fn_reverse_string: Reverses a string.
-
     User:
     Say hello to John.
 
     Output:
     fn_greet
-
-    Functions:
-    - fn_add_numbers: Adds two numbers.
-    - fn_greet: Greets a person by name.
-    - fn_reverse_string: Reverses a string.
 
     User:
     Reverse the word "hello".
@@ -59,9 +39,10 @@ class PromptType(Enum):
     """
 
     FUNCTION_DEFINITION_DYNAMIC = """
-    User request:
-
+    User:
     {USER_PROMPT}
+
+    Output:
     """
 
     FUNCTION_DEFINITION_PARAM_STATIC = """
@@ -106,7 +87,7 @@ class PromptGenerator:
             self.fns_def_static_prompt: str
             self.fn_params_static_prompt: str
 
-        def set_static_fns_def_static_prompt(self) -> Self:
+        def set_fns_def_static_prompt(self) -> Self:
             self.fns_def_static_prompt = (
                 PromptType.FUNCTIONS_DEFINITION_STATIC.value.replace(
                     "{FUNCTIONS}", self.__get_fns_def
@@ -146,7 +127,6 @@ class PromptGenerator:
     def next_prompt(self) -> Generator[str]:
         user_prompt: str
         for prompt in self.prompts:
-            print(prompt)
             user_prompt = prompt["prompt"]
             yield user_prompt
 
@@ -162,46 +142,3 @@ class PromptGenerator:
     @property
     def get_fn_params_static_prompt(self) -> str:
         return self.__fn_params_static_prompt
-
-
-"""
-
-public class User {
-    private final String firstName; // required
-    private final String lastName;  // required
-    private final int age;          // optional
-    private final String email;     // optional
-
-    public static class Builder {
-        private final String firstName;
-        private final String lastName;
-        private int age = 0;
-        private String email = "";
-
-        public Builder(String firstName, String lastName) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
-
-        public Builder age(int age) { this.age = age; return this; }
-        public Builder email(String email) { this.email = email; return this; }
-
-        public User build() {
-            return new User(this);
-        }
-    }
-
-    private User(Builder builder) {
-        this.firstName = builder.firstName;
-        this.lastName = builder.lastName;
-        this.age = builder.age;
-        this.email = builder.email;
-    }
-}
-
-// Usage:
-User user = new User.Builder("John", "Doe")
-                .age(30)
-                .email("john@example.com")
-                .build();
-"""

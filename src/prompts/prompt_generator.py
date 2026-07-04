@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import final
 
 from src.Models.PromptJson import PromptModel, PromptsRootModel
 from src.Models.FunctionDefinitionJson import FunctionDefinitionModel
@@ -94,7 +93,6 @@ class PromptType(Enum):
     """
 
 
-@final
 class PromptGenerator:
 
     class Builder:
@@ -116,14 +114,12 @@ class PromptGenerator:
             )
             return self
 
-        @property
         def set_params_static_prompt(self) -> Self:
             self.fn_params_static_prompt = (
                 PromptType.FUNCTION_DEFINITION_PARAM_STATIC.value
             )
             return self
 
-        @property
         def build(self) -> "PromptGenerator":
             return PromptGenerator(self)
 
@@ -143,8 +139,8 @@ class PromptGenerator:
     def __init__(self, builder: Builder) -> None:
         self.__functions_defintion_json: FunctionDefinitionModel = builder.fns_def_json
         self.prompts: PromptsRootModel = builder.prompts
-        self.fns_def_static_prompt: str = builder.fns_def_static_prompt
-        self.fn_params_static_prompt: str = builder.fn_params_static_prompt
+        self.__fns_def_static_prompt: str = builder.fns_def_static_prompt
+        self.__fn_params_static_prompt: str = builder.fn_params_static_prompt
 
     @property
     def next_prompt(self) -> Generator[str]:
@@ -159,12 +155,13 @@ class PromptGenerator:
             "{USER_PROMPT}", prompt
         )
 
+    @property
+    def get_fns_def_static_prompt(self) -> str:
+        return self.__fns_def_static_prompt
 
-def test_prompt_manager(
-    functions_definition_json: FunctionDefinitionModel, prompts: PromptModel
-) -> None:
-
-    prompt_manager: PromptManager = PromptManager(functions_definition_json, prompts)
+    @property
+    def get_fn_params_static_prompt(self) -> str:
+        return self.__fn_params_static_prompt
 
 
 """

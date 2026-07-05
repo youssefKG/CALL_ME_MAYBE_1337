@@ -12,7 +12,7 @@ def main() -> None:
     prompt: str = generator.next_prompt
     text_ids_generator: callable = generator.generate_prompt_ids(prompt)
     text_ids = text_ids_generator()
-    for _ in range(100):
+    for _ in range(10):
         token, token_id = generator.get_next_token(text_ids)
         text_ids = text_ids_generator(token_id)
         print(token, end="")

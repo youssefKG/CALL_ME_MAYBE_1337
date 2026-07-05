@@ -9,39 +9,31 @@ import json
 
 class PromptType(Enum):
     FUNCTIONS_DEFINITION_STATIC = """
-You are a function selector.
-
 Instructions:
 - Read the available function definitions.
 - Select the single function that best matches the user's request.
 - Return ONLY the function name.
-- Do NOT explain.
+- Do not explain.
+- Do not repeat the user request.
+- If the best function is fn_add_numbers, output exactly: fn_add_numbers
 - Do NOT output anything else.
-- Add the answer and it should be only the function name
-- Only the answer
+
+
 
 Functions:
-{FUNCTIONS}
-
-Examples:
-
-User: What is the sum of 1 and 3?
-Answer: "fn_add_numbers"
-
-User: Say hello to John.
-Answer: "fn_greet"
-
-User: Reverse the word "hello".
-Answer: "fn_reverse_string"
-
-User: What is the square root of 49?
-Answer: "fn_get_square_root"
-
-Now answer this."""
+[
+  {"name":"fn_add_numbers","description":"Add two numbers together and return their sum."},
+  {"name":"fn_greet","description":"Generate a greeting message for a person by name."},
+  {"name":"fn_reverse_string","description":"Reverse a string and return the reversed result."},
+  {"name":"fn_get_square_root","description":"Calculate the square root of a number."},
+  {"name":"fn_substitute_string_with_regex","description":"Replace all occurrences matching a regex pattern in a string."}
+]
+"""
 
     FUNCTION_DEFINITION_DYNAMIC = """
 User request: {USER_PROMPT}
-Answer: \""""
+
+Answer: """
 
     FUNCTION_DEFINITION_PARAM_STATIC = """
     You are a function parameter extractor.
@@ -140,3 +132,4 @@ class PromptGenerator:
     @property
     def get_fn_params_static_prompt(self) -> str:
         return self.__fn_params_static_prompt
+

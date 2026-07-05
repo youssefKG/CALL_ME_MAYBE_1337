@@ -9,3 +9,7 @@ https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output
 ### best format for constraint decoding
 https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output#the-mathematical-formulation
 ### end
+
+
+### Prefix tree:
+https://polaris000.medium.com/understanding-prefix-trees-13da74b3cafb

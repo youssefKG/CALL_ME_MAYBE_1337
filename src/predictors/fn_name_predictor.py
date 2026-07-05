@@ -1,4 +1,37 @@
-from .prediction_result import PredictionResult
+from .predictor_utils import  Trie
+
+
+class FnNamePredictor:
+
+
+    def __init__(self, fns_names_ids: list[list[int]]) -> None:
+        self.__fns_names_ids: list[list[int]] = fns_names_ids
+        self.__fns_names_ids_trie: Trie = Trie()
+        self.__set_fns_names_ids_trie()
+
+    def __set_fns_names_ids_trie(self) -> None:
+        for fn_ids in self.__fns_names_ids:
+            self.__fns_names_ids_trie.add(fn_ids)
+
+    def get_next_predictions_ids(self, ids: list[int]) -> list[int]:
+        return self.__fns_names_ids_trie.get_children(ids)
+
+    def is_completed(self, ids: list[int]) -> bool:
+        return self.__fns_names_ids_trie.search(ids)
+
+
+
+def test_fn_names_predictor() -> None:
+    test_one: list[list[int]] = [[1, 2, 3, 4, 5, 6, 10], [1, 2, 3, 4, 5, 6, 9, 10], [1, 2, 3, 4, 5, 6, 7, 8],[1, 2, 3, 4, 5, 6, 17, 8]]
+    fn_names_predictor: FnNamePredictor = FnNamePredictor(test_one)
+    print(fn_names_predictor.get_next_predictions_ids([1, 2, 3, 4, 5, 6]))
+    print(fn_names_predictor.is_completed([1, 2, 3, 4, 5, 6, 10]))
+
+
+if __name__ == "__main__":
+    test_fn_names_predictor()
+
+"""
 
 
 class FnNamePredictor:
@@ -44,9 +77,12 @@ class FnNamePredictor:
             if idx < len(fn_name) - 1:
                 tokens.add(fn_name[idx + 1])
         return tokens
+"""
 
 
 # TEST
+"""
+
 def test_predirect_token_for_fn_names(pregenerated_fn_name: str) -> None:
     fn_names: set[str] = set(
         {
@@ -70,3 +106,4 @@ def test_predirect_token_for_fn_names(pregenerated_fn_name: str) -> None:
 if __name__ == "__main__":
     test_predirect_token_for_fn_names("fn_")
     test_predirect_token_for_fn_names("f")
+"""

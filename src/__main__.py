@@ -9,15 +9,14 @@ def main() -> None:
     parser: Parser = Parser(sys.argv)
     parser.parse()
     generator: Generator = Generator(parser)
-    prompt: str = generator.next_prompt()
-    print(prompt)
-    """
+    prompt: str = generator.next_prompt
     text_ids_generator: callable = generator.generate_prompt_ids(prompt)
+    text_ids = text_ids_generator()
+    for _ in range(100):
+        token, token_id = generator.get_next_token(text_ids)
+        text_ids = text_ids_generator(token_id)
+        print(token, end="")
 
-    token, token_id = generator.get_next_token(text_ids)
-    text_ids: list[int] = text_ids_generator(token_id)
-    print(next_token)
-    """
 
 if __name__ == "__main__":
     main()

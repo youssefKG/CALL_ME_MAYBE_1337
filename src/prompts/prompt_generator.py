@@ -9,41 +9,39 @@ import json
 
 class PromptType(Enum):
     FUNCTIONS_DEFINITION_STATIC = """
-    - Read the available function definitions.
-    - Compare the user request against each function's description.
-    - Select the function that best matches the user's intent.
-    - Return ONLY the function name.
-    - Do NOT return JSON.
-    - Do NOT explain.
+You are a function selector.
 
-    Functions:
-    {FUNCTIONS}
+Instructions:
+- Read the available function definitions.
+- Select the single function that best matches the user's request.
+- Return ONLY the function name.
+- Do NOT explain.
+- Do NOT output anything else.
+- Add the answer and it should be only the function name
+- Only the answer
 
-    User:
-    What is the sum of 2 and 3?
+Functions:
+{FUNCTIONS}
 
-    Output:
-    fn_add_numbers
+Examples:
 
-    User:
-    Say hello to John.
+User: What is the sum of 1 and 3?
+Answer: "fn_add_numbers"
 
-    Output:
-    fn_greet
+User: Say hello to John.
+Answer: "fn_greet"
 
-    User:
-    Reverse the word "hello".
+User: Reverse the word "hello".
+Answer: "fn_reverse_string"
 
-    Output:
-    fn_reverse_string"
-    """
+User: What is the square root of 49?
+Answer: "fn_get_square_root"
+
+Now answer this."""
 
     FUNCTION_DEFINITION_DYNAMIC = """
-    User:
-    {USER_PROMPT}
-
-    Output:
-    """
+User request: {USER_PROMPT}
+Answer: \""""
 
     FUNCTION_DEFINITION_PARAM_STATIC = """
     You are a function parameter extractor.

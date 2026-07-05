@@ -16,6 +16,3 @@ class B(A):
     @override
     def _hello(self) -> None:
         print("hello")
-
-
-b = B()

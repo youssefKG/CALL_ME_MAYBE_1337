@@ -27,8 +27,7 @@ class Model(Singleton, Small_LLM_Model):
             trust_remote_code=trust_remote_code,  # constructor
         )
 
-    @override
-    def encode(self, text: str) -> list[int]:
+    def encode_text(self, text: str) -> list[int]:
         text_ids: list[int] = [int(x) for x in super().encode(text).flatten()]
         return text_ids
 
@@ -36,7 +35,6 @@ class Model(Singleton, Small_LLM_Model):
         logits: list[float] = self.get_logits_from_input_ids(input_ids)
         return logits
 
-
     @override
-    def decode(self, text_ids: list[int]) -> int:
-        return super().decode(text_ids)
+    def decode(self, ids: torch.Tensor | list[int]) -> str:
+        return super().decode(ids)

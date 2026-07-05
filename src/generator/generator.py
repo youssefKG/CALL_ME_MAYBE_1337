@@ -1,3 +1,4 @@
+from predictors.fn_name_predictor import FnNamePredictor
 from src.LlmModel.model import Model
 from src.Parser.Parser import Parser
 from src.prompts.prompt_generator import PromptGenerator
@@ -10,6 +11,7 @@ class Generator:
         self.__model: Model = Model()
         self.__cache = Cache()
         self.__parser: Parser = parser
+        self.fn_predictor: FnNamePredictor
         self.__prompt_generator: PromptGenerator = (
             PromptGenerator.Builder(
                 self.__parser.get_fns_def, self.__parser.get_prompts
@@ -52,6 +54,9 @@ class Generator:
     @property
     def next_prompt(self) -> str:
         return next(self.__prompt_generator.next_prompt)
+
+    def __set_fns_names_to_predictors(self) -> None:
+        pass
 
     def __init_cache(self) -> None:
         encoded_fns_def_names_ids: list[int] = self.__model.encode_text(

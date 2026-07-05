@@ -132,4 +132,3 @@ class PromptGenerator:
     @property
     def get_fn_params_static_prompt(self) -> str:
         return self.__fn_params_static_prompt
-

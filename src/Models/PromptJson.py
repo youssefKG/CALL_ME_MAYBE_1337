@@ -6,7 +6,7 @@ from typing_extensions import override
 
 class PromptModel(BaseModel):
     prompt: str
-    model_config = ConfigDict(extra="forbid")
+    model_config: ConfigDict = ConfigDict(extra="forbid")
 
 
 class PromptsRootModel(RootModel[list[PromptModel]]): ...

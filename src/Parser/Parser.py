@@ -1,7 +1,5 @@
 from pathlib import Path
-
 from src.Models.FunctionDefinitionJson import FunctionDefinitionModel
-
 from .ArgParser import ArgsParser
 from src.Models.PromptJson import PromptsRootModel
 
@@ -43,3 +41,7 @@ class Parser:
     @property
     def get_fns_def(self) -> FunctionDefinitionModel:
         return self.__function_defintions
+
+    def get_fns_def_names(self) -> set[str]:
+        fns_def: set[str] = set()
+        return fns_def

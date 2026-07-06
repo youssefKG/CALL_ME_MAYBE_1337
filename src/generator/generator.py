@@ -1,4 +1,4 @@
-from predictors.fn_name_predictor import FnNamePredictor
+from src.predictors.fn_name_predictor import FnNamePredictor
 from src.LlmModel.model import Model
 from src.Parser.Parser import Parser
 from src.prompts.prompt_generator import PromptGenerator
@@ -11,7 +11,8 @@ class Generator:
         self.__model: Model = Model()
         self.__cache = Cache()
         self.__parser: Parser = parser
-        self.fn_predictor: FnNamePredictor
+        print("===============================")
+        print("functions" ,self.__parser.get_fns_def)
         self.__prompt_generator: PromptGenerator = (
             PromptGenerator.Builder(
                 self.__parser.get_fns_def, self.__parser.get_prompts
@@ -20,7 +21,10 @@ class Generator:
             .set_fns_def_static_prompt()
             .build()
         )
+        self.__fn_predictor: FnNamePredictor = FnNamePredictor()
         self.__init_cache()
+        self.__init_fns_def_predictor()
+        self.__fn_predictor.get_next_predictions_ids([])
 
     def generate_prompt_ids(self, prompt: str) -> callable:
         text_ids: list[int] = list()
@@ -67,3 +71,9 @@ class Generator:
         )
         self.__cache.set_fns_def_static_prompt_ids(encoded_fns_def_names_ids)
         self.__cache.set_fn_params_static_prompt_ids(encoded_fn_def_params_ids)
+
+    def __init_fns_def_predictor(self) ->  None:
+        fns_def_names_ids: list[list[int]] = list()
+        for fn_def in self.__parser.get_fns_def:
+            fns_def_names_ids.append(self.__model.encode(fn_def["name"]))
+        self.__fn_predictor.add(fns_def_names_ids)

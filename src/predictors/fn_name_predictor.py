@@ -35,7 +35,6 @@ class Trie:
 
 
 class FnNamePredictor:
-
     def __init__(
         self,
     ) -> None:
@@ -51,22 +50,3 @@ class FnNamePredictor:
 
     def is_completed(self, ids: list[int]) -> bool:
         return self.__fns_names_ids_trie.search(ids)
-
-
-# Test
-"""
-def test_fn_names_predictor(test: list[int]) -> None:
-    test_one: list[list[int]] = [
-        [5, 2, 3, 4, 5, 6, 10],
-        [2, 2, 3, 4, 5, 6, 9, 10],
-        [3, 2, 3, 4, 5, 6, 7, 8],
-        [5, 9, 3, 4, 5, 6, 17, 8],
-    ]
-    fn_names_predictor: FnNamePredictor = FnNamePredictor(test_one)
-    print(fn_names_predictor.get_next_predictions_ids(test))
-
-
-if __name__ == "__main__":
-    test_two: list[int] = [5]
-    test_fn_names_predictor(test_two)
-"""

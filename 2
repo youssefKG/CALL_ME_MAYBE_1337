@@ -46,18 +46,13 @@ class FnNameGenerator:
             while len(next_posible_ids) == 1:
                 self.__generated_ids.append(next_posible_ids[0])
                 self.__text_ids.append(next_posible_ids[0])
-                res.append(self.__model.decode(next_posible_ids[0]))
+                res.append(next_posible_ids[0])
                 next_posible_ids = self.__fn_name_predictor.get_children(
                     self.__generated_ids
                 )
             if self.__fn_name_predictor.is_completed(self.__generated_ids):
                 break
         return "".join(res)
-
-    def add_next_token(self, id: int) -> None:
-        self.__generated_ids.append(id)
-        self.__text_ids.append(id)
-        return self.__model.decode(id)
 
 
 class OutputGenerator:

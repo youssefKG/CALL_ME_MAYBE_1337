@@ -1,3 +1,5 @@
+from pydantic_core.core_schema import GeneralPlainInfoSerializerFunction
+from collections.abc import Generator
 from src.predictors.fn_name_predictor import FnNamePredictor
 from src.LlmModel.model import Model
 from src.Parser.Parser import Parser
@@ -6,13 +8,49 @@ from src.cache.cache import Cache
 import torch
 
 
-class Generator:
+class FnNameGenerator:
+    def __init__(
+        self,
+        model: Model,
+        fn_predicor: FnNamePredictor,
+        static_prompt_ids: list[int],
+        dynamic_prompt_ids: list[int],
+    ) -> None:
+        self.__model = model
+        self.__fn_name_predictor: FnNamePredictor = fn_predicor
+        self.__static_prompt_ids: list[int] = static_prompt_ids
+        self.__dynmaic_prompt_ids: list[int] = dynamic_prompt_ids
+        self.__text_ids: list[int] = (
+            self.__static_prompt_ids + self.__dynmaic_prompt_ids
+        )
+        self.__generated_ids: list[int] = list()
+
+    def generate(self) -> str:
+        res: list[str] = list()
+        while True:
+            predicted_ids: list[int] = (
+                self.__fn_name_predictor.get_next_predictions_ids(self.__generated_ids)
+            )
+            logits: list[float] = self.__model.get_logits(self.__text_ids)
+            for idx, _ in enumerate(logits):
+                if idx not in predicted_ids:
+                    logits[idx] = float("-inf")
+            high_score = torch.argmax(torch.tensor(logits))
+            token: str = self.__model.decode(torch.tensor(high_score))
+            token_id: int = self.__model.encode_text(token)[0]
+            res.append(token)
+            self.__generated_ids.append(token_id)
+            self.__text_ids.append(token_id)
+            if self.__fn_name_predictor.is_completed(self.__generated_ids):
+                break
+        return "".join(res)
+
+
+class OutputGenerator:
     def __init__(self, parser: Parser) -> None:
         self.__model: Model = Model()
         self.__cache = Cache()
         self.__parser: Parser = parser
-        print("===============================")
-        print("functions" ,self.__parser.get_fns_def)
         self.__prompt_generator: PromptGenerator = (
             PromptGenerator.Builder(
                 self.__parser.get_fns_def, self.__parser.get_prompts
@@ -24,43 +62,27 @@ class Generator:
         self.__fn_predictor: FnNamePredictor = FnNamePredictor()
         self.__init_cache()
         self.__init_fns_def_predictor()
-        self.__fn_predictor.get_next_predictions_ids([])
 
-    def generate_prompt_ids(self, prompt: str) -> callable:
-        text_ids: list[int] = list()
-        fns_def_dynamic_prompt: str = (
-            self.__prompt_generator.get_fns_def_dynamic_prompt(prompt)
-        )
-        fns_def_dynamic_prompt_ids: list[int] = self.__model.encode_text(
-            fns_def_dynamic_prompt
-        )
-        fns_static_prompts_ids: list[int] = self.__cache.get_params_ids
-        text_ids += fns_def_dynamic_prompt_ids + fns_static_prompts_ids
-        print(self.__prompt_generator.get_fns_def_static_prompt, end="")
-        print(fns_def_dynamic_prompt, end="")
-
-        def generate(token_id: int | None = None) -> list[int]:
-            nonlocal text_ids
-            if token_id is None:
-                return text_ids
-            text_ids.append(token_id)
-            return text_ids
-
-        return generate
-
-    def get_next_token(self, text_ids: list[int]) -> tuple[str, int]:
-        logits: list[float] = self.__model.get_logits(text_ids)
-        props_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
-        token: str = self.__model.decode(torch.tensor(props_ids))
-        token_id: int = self.__model.encode_text(token)[0]
-        return (token, token_id)
-
-    @property
-    def next_prompt(self) -> str:
-        return next(self.__prompt_generator.next_prompt)
-
-    def __set_fns_names_to_predictors(self) -> None:
-        pass
+    def generate(self) -> Generator[str | None]:
+        prompt_generator: Generator[str | None] = self.__prompt_generator.next_prompt
+        prompt: str | None = next(prompt_generator)
+        while prompt is not None:
+            print(prompt)
+            static_prompt_ids: list[int] = self.__cache.get_fn_names_ids
+            dynmaic_prompt_str: str = (
+                self.__prompt_generator.get_fns_def_dynamic_prompt(prompt)
+            )
+            dynamic_prompt_ids: list[int] = self.__model.encode_text(dynmaic_prompt_str)
+            fn_name_generator = FnNameGenerator(
+                self.__model,
+                self.__fn_predictor,
+                static_prompt_ids,
+                dynamic_prompt_ids,
+            )
+            fn_name = fn_name_generator.generate()
+            yield fn_name
+            prompt: str | None = next(prompt_generator)
+        yield None
 
     def __init_cache(self) -> None:
         encoded_fns_def_names_ids: list[int] = self.__model.encode_text(
@@ -72,8 +94,15 @@ class Generator:
         self.__cache.set_fns_def_static_prompt_ids(encoded_fns_def_names_ids)
         self.__cache.set_fn_params_static_prompt_ids(encoded_fn_def_params_ids)
 
-    def __init_fns_def_predictor(self) ->  None:
+    def __next_prompt(self) -> str:
+        prompt_generator: Generator[str | None] = self.__prompt_generator.next_prompt
+        prompt: str | None = next(prompt_generator)
+        while prompt is not None:
+            print(prompt)
+            prompt = next(prompt_generator)
+
+    def __init_fns_def_predictor(self) -> None:
         fns_def_names_ids: list[list[int]] = list()
         for fn_def in self.__parser.get_fns_def:
-            fns_def_names_ids.append(self.__model.encode(fn_def["name"]))
-        self.__fn_predictor.add(fns_def_names_ids)
+            fns_def_names_ids.append(self.__model.encode_text(fn_def["name"]))
+        self.__fn_predictor.set_fns_names_ids_trie(fns_def_names_ids)

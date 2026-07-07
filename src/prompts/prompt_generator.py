@@ -114,11 +114,12 @@ class PromptGenerator:
         self.__fn_params_static_prompt: str = builder.fn_params_static_prompt
 
     @property
-    def next_prompt(self) -> Generator[str]:
+    def next_prompt(self) -> Generator[str | None]:
         user_prompt: str
         for prompt in self.prompts:
             user_prompt = prompt["prompt"]
             yield user_prompt
+        yield None
 
     def get_fns_def_dynamic_prompt(self, prompt: str) -> str:
         return PromptType.FUNCTION_DEFINITION_DYNAMIC.value.replace(

@@ -38,7 +38,6 @@ class FnNamePredictor:
     def __init__(
         self,
     ) -> None:
-        self.__fns_names_ids: list[list[int]]
         self.__fns_names_ids_trie: Trie = Trie()
 
     def set_fns_names_ids_trie(self, fns_names_ids: list[list[int]]) -> None:

@@ -23,10 +23,20 @@ class FnNameGenerator:
             self.__static_prompt_ids + self.__dynmaic_prompt_ids
         )
         self.__generated_ids: list[int] = list()
+        self.__fn_name: list[str] = list()
 
     def generate(self) -> str:
-        res: list[str] = list()
         while True:
+            next_posible_ids: list[int] = self.__fn_name_predictor.get_children(
+                self.__generated_ids
+            )
+            while len(next_posible_ids) == 1:
+                self.add_next_token_id(next_posible_ids[0])
+                next_posible_ids = self.__fn_name_predictor.get_children(
+                    self.__generated_ids
+                )
+            if self.__fn_name_predictor.is_completed(self.__generated_ids):
+                break
             predicted_ids: list[int] = (
                 self.__fn_name_predictor.get_next_predictions_ids(self.__generated_ids)
             )
@@ -37,27 +47,14 @@ class FnNameGenerator:
             high_score = torch.argmax(torch.tensor(logits))
             token: str = self.__model.decode(torch.tensor(high_score))
             token_id: int = self.__model.encode_text(token)[0]
-            res.append(token)
-            self.__generated_ids.append(token_id)
-            self.__text_ids.append(token_id)
-            next_posible_ids: list[int] = self.__fn_name_predictor.get_children(
-                self.__generated_ids
-            )
-            while len(next_posible_ids) == 1:
-                self.__generated_ids.append(next_posible_ids[0])
-                self.__text_ids.append(next_posible_ids[0])
-                res.append(self.__model.decode(next_posible_ids[0]))
-                next_posible_ids = self.__fn_name_predictor.get_children(
-                    self.__generated_ids
-                )
-            if self.__fn_name_predictor.is_completed(self.__generated_ids):
-                break
-        return "".join(res)
+            self.add_next_token_id(token_id)
+        return "".join(self.__fn_name)
 
-    def add_next_token(self, id: int) -> None:
+    def add_next_token_id(self, id: int) -> None:
         self.__generated_ids.append(id)
         self.__text_ids.append(id)
-        return self.__model.decode(id)
+        token: str = self.__model.decode(torch.tensor(id))
+        self.__fn_name.append(token)
 
 
 class OutputGenerator:
@@ -95,7 +92,7 @@ class OutputGenerator:
             )
             fn_name = fn_name_generator.generate()
             yield fn_name
-            prompt: str | None = next(prompt_generator)
+            prompt = next(prompt_generator)
         yield None
 
     def __init_cache(self) -> None:

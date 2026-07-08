@@ -54,7 +54,7 @@ class Small_LLM_Model:
         if dtype is None:
             dtype = (
                 torch.float16
-                if self._device in ["cuda", "mps", "cpu"]
+                if self._device in ["cuda", "mps"]
                 else torch.float32
             )
         self._dtype = dtype

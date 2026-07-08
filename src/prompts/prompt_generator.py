@@ -18,49 +18,40 @@ Instructions:
 - If the best function is fn_add_numbers, output exactly: fn_add_numbers
 - Do NOT output anything else.
 
-
-
 Functions:
-[
-  {"name":"fn_add_numbers","description":"Add two numbers together and return their sum."},
-  {"name":"fn_greet","description":"Generate a greeting message for a person by name."},
-  {"name":"fn_reverse_string","description":"Reverse a string and return the reversed result."},
-  {"name":"fn_get_square_root","description":"Calculate the square root of a number."},
-  {"name":"fn_substitute_string_with_regex","description":"Replace all occurrences matching a regex pattern in a string."}
-]
+{FUNCTIONS}
 """
 
     FUNCTION_DEFINITION_DYNAMIC = """
 User request: {USER_PROMPT}
-
 Answer: """
 
     FUNCTION_DEFINITION_PARAM_STATIC = """
-    You are a function parameter extractor.
+You are a function parameter extractor.
 
-    Given:
-    - a selected function definition
-    - a user request
+Given:
+- a selected function definition
+- a user request
 
-    Extract the arguments using these rules:
+Extract the arguments using these rules:
 
-    - Use exact parameter names.
-    - Use correct JSON types.
-    - Infer values only when supported by the request.
-    - Do not hallucinate missing values.
-    - Required but unknown values must be null.
-    - Omit optional unknown parameters.
-    - Return only a valid JSON object.
-    - No markdown.
-    - No explanations.
+- Use exact parameter names.
+- Use correct JSON types.
+- Infer values only when supported by the request.
+- Do not hallucinate missing values.
+- Required but unknown values must be null.
+- Omit optional unknown parameters.
+- Return only a valid JSON object.
+- No markdown.
+- No explanations.
     """
 
     FUNCTION_DEFINTION_PARAM_DYNAMIC = """
-    Function:
-    {FUNCTION}
+Function:
+{FUNCTION}
 
-    Request:
-    {USER_PROMPT}
+Request:
+{USER_PROMPT}
     """
 
 

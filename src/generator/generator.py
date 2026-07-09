@@ -7,54 +7,107 @@ from src.cache.cache import Cache
 import torch
 
 
-class FnNameGenerator:
+class FunctionNameGenerator:
     def __init__(
         self,
         model: Model,
+        cache: Cache,
         fn_predicor: FnNamePredictor,
-        static_prompt_ids: list[int],
-        dynamic_prompt_ids: list[int],
+        prompt_generator: PromptGenerator,
+        prompt: str,
     ) -> None:
         self.__model = model
-        self.__fn_name_predictor: FnNamePredictor = fn_predicor
-        self.__static_prompt_ids: list[int] = static_prompt_ids
-        self.__dynmaic_prompt_ids: list[int] = dynamic_prompt_ids
-        self.__text_ids: list[int] = (
-            self.__static_prompt_ids + self.__dynmaic_prompt_ids
-        )
+        self.__prompt_generator: PromptGenerator = prompt_generator
+        self.__function_name_predictor: FnNamePredictor = fn_predicor
+        self.__cache: Cache = cache
+        self.__text_ids: list[int] = list()
         self.__generated_ids: list[int] = list()
-        self.__fn_name: list[str] = list()
+        self.__fn_name_list: list[str] = list()
+        self.__prompt: str = prompt
+        self.__fn_name: str = ""
+        self.__init_text_ids()
 
-    def generate(self) -> str:
+    def generate(self) -> None:
         while True:
-            next_posible_ids: list[int] = self.__fn_name_predictor.get_children(
-                self.__generated_ids
-            )
-            while len(next_posible_ids) == 1:
-                self.add_next_token_id(next_posible_ids[0])
-                next_posible_ids = self.__fn_name_predictor.get_children(
-                    self.__generated_ids
-                )
-            if self.__fn_name_predictor.is_completed(self.__generated_ids):
+            self.__predict_next_token()
+            if self.__function_name_predictor.is_completed(self.__generated_ids):
                 break
             predicted_ids: list[int] = (
-                self.__fn_name_predictor.get_next_predictions_ids(self.__generated_ids)
+                self.__function_name_predictor.get_next_predictions_ids(
+                    self.__generated_ids
+                )
             )
             logits: list[float] = self.__model.get_logits(self.__text_ids)
             for idx, _ in enumerate(logits):
                 if idx not in predicted_ids:
                     logits[idx] = float("-inf")
             high_score = torch.argmax(torch.tensor(logits))
-            token: str = self.__model.decode(torch.tensor(high_score))
-            token_id: int = self.__model.encode_text(token)[0]
-            self.add_next_token_id(token_id)
-        return "".join(self.__fn_name)
+            self.__add_next_token_id(int(high_score))
+        self.__fn_name = "".join(self.__fn_name_list)
 
-    def add_next_token_id(self, id: int) -> None:
+    def __add_next_token_id(self, id: int) -> None:
         self.__generated_ids.append(id)
         self.__text_ids.append(id)
         token: str = self.__model.decode(torch.tensor(id))
-        self.__fn_name.append(token)
+        self.__fn_name_list.append(token)
+
+    def __init_text_ids(self) -> None:
+        self.__text_ids = (
+            self.__cache.get_function_name_static_prompt_ids
+            + self.__model.encode_text(
+                self.__prompt_generator.get_fns_def_dynamic_prompt(self.__prompt)
+            )
+        )
+
+    def __predict_next_token(self) -> None:
+        next_predicted_ids: list[int] = (
+            self.__function_name_predictor.get_next_predictions_ids(
+                self.__generated_ids
+            )
+        )
+        while len(next_predicted_ids) == 1:
+            next_token_id: int = next_predicted_ids[0]
+            self.__text_ids.append(next_token_id)
+            self.__generated_ids.append(next_token_id)
+            next_token: str = self.__model.decode(torch.tensor(next_token_id))
+            self.__fn_name_list.append(next_token)
+            next_predicted_ids = (
+                self.__function_name_predictor.get_next_predictions_ids(
+                    self.__generated_ids
+                )
+            )
+
+    @property
+    def fn_name(self) -> str:
+        return self.__fn_name
+
+    def __mask_low_score_logits(
+        self, logits: list[float], high_score_ids: list[int]
+    ) -> None:
+        for idx, _ in enumerate(logits):
+            if idx not in high_score_ids:
+                logits[idx] = float("-inf")
+
+
+class FunctionParametreGenerator:
+    def __init__(
+        self,
+        static_prompt_ids: list[int],
+        prompt_generator: PromptGenerator,
+        model: Model,
+    ) -> None:
+        self.prompt_generator: PromptGenerator = prompt_generator
+        self.generated_ids: list[int] = list()
+        self.__text_ids: list[int] = list()
+        self.__model: Model = model
+        self.__set_static_parametre_ids()
+
+    def generate(self) -> None:
+        while True:
+            pass
+
+    def __set_static_parametre_ids(self) -> None:
+        pass
 
 
 class OutputGenerator:
@@ -75,23 +128,22 @@ class OutputGenerator:
         self.__init_fns_def_predictor()
 
     def generate(self) -> Generator[str | None]:
+        yield ""
+
+    def generate_function_name(self) -> Generator[str | None]:
         prompt_generator: Generator[str | None] = self.__prompt_generator.next_prompt
         prompt: str | None = next(prompt_generator)
         while prompt is not None:
             print(prompt)
-            static_prompt_ids: list[int] = self.__cache.get_fn_names_ids
-            dynmaic_prompt_str: str = (
-                self.__prompt_generator.get_fns_def_dynamic_prompt(prompt)
-            )
-            dynamic_prompt_ids: list[int] = self.__model.encode_text(dynmaic_prompt_str)
-            fn_name_generator = FnNameGenerator(
+            fn_name_generator: FunctionNameGenerator = FunctionNameGenerator(
                 self.__model,
+                self.__cache,
                 self.__fn_predictor,
-                static_prompt_ids,
-                dynamic_prompt_ids,
+                self.__prompt_generator,
+                prompt,
             )
-            fn_name = fn_name_generator.generate()
-            yield fn_name
+            fn_name_generator.generate()
+            yield fn_name_generator.fn_name
             prompt = next(prompt_generator)
         yield None
 
@@ -108,5 +160,5 @@ class OutputGenerator:
     def __init_fns_def_predictor(self) -> None:
         fns_def_names_ids: list[list[int]] = list()
         for fn_def in self.__parser.get_fns_def:
-            fns_def_names_ids.append(self.__model.encode_text(fn_def["name"]))
+            fns_def_names_ids.append(self.__model.encode_text(fn_def.name))
         self.__fn_predictor.set_fns_names_ids_trie(fns_def_names_ids)

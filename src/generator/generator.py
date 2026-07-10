@@ -28,6 +28,7 @@ class FunctionNameGenerator:
         self.__init_text_ids()
 
     def generate(self) -> None:
+        print(self.__prompt)
         while True:
             self.__predict_next_token()
             if self.__function_name_predictor.is_completed(self.__generated_ids):
@@ -67,10 +68,7 @@ class FunctionNameGenerator:
         )
         while len(next_predicted_ids) == 1:
             next_token_id: int = next_predicted_ids[0]
-            self.__text_ids.append(next_token_id)
-            self.__generated_ids.append(next_token_id)
-            next_token: str = self.__model.decode(torch.tensor(next_token_id))
-            self.__fn_name_list.append(next_token)
+            self.__add_next_token_id(next_token_id)
             next_predicted_ids = (
                 self.__function_name_predictor.get_next_predictions_ids(
                     self.__generated_ids
@@ -80,13 +78,6 @@ class FunctionNameGenerator:
     @property
     def fn_name(self) -> str:
         return self.__fn_name
-
-    def __mask_low_score_logits(
-        self, logits: list[float], high_score_ids: list[int]
-    ) -> None:
-        for idx, _ in enumerate(logits):
-            if idx not in high_score_ids:
-                logits[idx] = float("-inf")
 
 
 class FunctionParametreGenerator:
@@ -127,14 +118,10 @@ class OutputGenerator:
         self.__init_cache()
         self.__init_fns_def_predictor()
 
-    def generate(self) -> Generator[str | None]:
-        yield ""
-
     def generate_function_name(self) -> Generator[str | None]:
         prompt_generator: Generator[str | None] = self.__prompt_generator.next_prompt
         prompt: str | None = next(prompt_generator)
         while prompt is not None:
-            print(prompt)
             fn_name_generator: FunctionNameGenerator = FunctionNameGenerator(
                 self.__model,
                 self.__cache,
@@ -149,13 +136,9 @@ class OutputGenerator:
 
     def __init_cache(self) -> None:
         encoded_fns_def_names_ids: list[int] = self.__model.encode_text(
-            self.__prompt_generator.get_fn_params_static_prompt
-        )
-        encoded_fn_def_params_ids: list[int] = self.__model.encode_text(
             self.__prompt_generator.get_fns_def_static_prompt
         )
         self.__cache.set_fns_def_static_prompt_ids(encoded_fns_def_names_ids)
-        self.__cache.set_fn_params_static_prompt_ids(encoded_fn_def_params_ids)
 
     def __init_fns_def_predictor(self) -> None:
         fns_def_names_ids: list[list[int]] = list()

@@ -49,6 +49,3 @@ class FnNamePredictor:
 
     def is_completed(self, ids: list[int]) -> bool:
         return self.__fns_names_ids_trie.search(ids)
-
-    def get_children(self, ids: list[int]) -> list[int]:
-        return self.__fns_names_ids_trie.get_children(ids)

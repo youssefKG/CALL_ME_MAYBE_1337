@@ -48,10 +48,19 @@ class OutputGenerator:
         encoded_fns_def_names_ids: list[int] = self.__model.encode_text(
             self.__prompt_generator.get_fns_def_static_prompt
         )
+        function_argument_static_prompt_ids: list[int] = self.__model.encode_text(
+            self.__prompt_generator.get_function_argument_static_prompt
+        )
         self.__cache.set_fns_def_static_prompt_ids(encoded_fns_def_names_ids)
+        self.__cache.set_function_argument_static_prompt_ids(
+            function_argument_static_prompt_ids
+        )
 
     def __init_functions_name_predictor(self) -> None:
         fns_def_names_ids: list[list[int]] = list()
         for fn_def in self.__parser.get_fns_def:
             fns_def_names_ids.append(self.__model.encode_text(fn_def.name))
         self.__function_name_predictor.set_fns_names_ids_trie(fns_def_names_ids)
+
+    def prepare_next_argumenet(self, arg_name: str, arg_type: str) -> None:
+        pass

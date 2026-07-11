@@ -3,12 +3,6 @@ from llm_sdk.llm_sdk import Small_LLM_Model
 from src.utils.singleton import Singleton
 import torch
 
-#     # data_ids: list[int] = [int(x) for x in self.encode(prompt).flatten()]
-#     # logits: list[float] = self.get_logits_from_input_ids(data_ids)
-#     # prob_ids = torch.argmax(torch.tensor(logits), dim=-1).item()
-#     # next_token: str = self.decode(torch.tensor(prob_ids))
-#     next_token: str = ""
-
 
 class Model(Singleton, Small_LLM_Model):
 

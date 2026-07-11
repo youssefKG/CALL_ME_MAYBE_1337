@@ -1,10 +1,10 @@
 from enum import Enum
 
+from generator.function_parametre_generator import FunctionParameter
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
 from collections.abc import Generator
-from src.models.function_definition_model import TypeSpec
 import json
 
 
@@ -124,26 +124,34 @@ class PromptGenerator:
             "{USER_PROMPT}", prompt
         )
 
-    def get_function_params_dynamic_prompt(
+    def get_function_arguments_dynamic_prompt(
         self,
-        function: FunctionDefinitionModel,
+        function_definition: FunctionDefinitionModel,
         user_prompt: str,
-        : dict[str, TypeSpec],
-    ):
-        formated_params: str = self.__formated_parameters(params)
+        generated_arguments: list[FunctionParameter],
+        arg_name: str,
+        arg_value: str,
+    ) -> str:
+
         return (
             PromptType.FUNCTION_PARAMETER_DYNAMIC.value.replace(
-                "{FUNCTION}", function.name
+                "{FUNCTION}", function_definition.model_dump_json()
             )
-            .replace("{PARAMETER_NAME}", parameter_name)
-            .replace("{PARAMETER_TYPE}", parameter_type)
+            .replace("{USER_PROMPT}", user_prompt)
+            .replace("{PARAMETER_NAME}", arg_name)
+            .replace("{PARAMETER_TYPE}", arg_value)
+            .replace(
+                "{GENERATED_ARGUMENTS}",
+                self.__format_generated_argument(generated_arguments),
+            )
         )
 
-    def __formate_generated_parameters(self, generated_argument: dict[str, TypeSpec]) -> str:
+    def __format_generated_argument(
+        self, generated_argument: list[FunctionParameter]
+    ) -> str:
         res: str = ""
-        for param_name, param_type in params:
-            res += f"- Name: {param_name}\n"
-            res += f"- Type: {param_type}\n"
+        for arguement in generated_argument:
+            res += f"- Name: {arguement.name}\nType: {arguement.value}\n"
         return res
 
     @property
@@ -151,11 +159,5 @@ class PromptGenerator:
         return self.__fns_def_static_prompt
 
     @property
-    def get_fn_params_static_prompt(self) -> str:
+    def get_function_argument_static_prompt(self) -> str:
         return self.__fn_params_static_prompt
-
-    def get_fn_def_by_name(self, name: str) -> FunctionDefinitionModel | None:
-        for fn_def in self.__functions_defintion:
-            if fn_def.name == name:
-                return fn_def
-        return None

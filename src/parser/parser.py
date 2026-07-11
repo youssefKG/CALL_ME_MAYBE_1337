@@ -1,10 +1,10 @@
 from pathlib import Path
-from src.Models.FunctionDefinitionJson import (
+from src.models.function_definition_model import (
     FunctionsDefinitionRootModel,
     FunctionDefinitionModel,
 )
 from .ArgParser import ArgsParser
-from src.Models.PromptJson import PromptModel, PromptsRootModel
+from src.models.prompt_model import PromptModel, PromptsRootModel
 from typing import cast
 import json
 

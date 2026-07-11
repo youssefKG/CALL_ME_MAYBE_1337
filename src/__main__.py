@@ -1,4 +1,4 @@
-from src.Parser.Parser import Parser
+from src.parser.parser import Parser
 from src.generator.generator import OutputGenerator
 from collections.abc import Generator
 

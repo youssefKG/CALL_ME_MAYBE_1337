@@ -34,7 +34,7 @@ class Trie:
         return [x for x in curr_node.children.keys()]
 
 
-class FnNamePredictor:
+class FunctionNamePredictor:
     def __init__(
         self,
     ) -> None:

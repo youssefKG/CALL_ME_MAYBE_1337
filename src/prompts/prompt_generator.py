@@ -1,9 +1,10 @@
 from enum import Enum
 
-from src.Models.PromptJson import PromptModel
-from src.Models.FunctionDefinitionJson import FunctionDefinitionModel
+from src.models.prompt_model import PromptModel
+from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
 from collections.abc import Generator
+from src.models.function_definition_model import TypeSpec
 import json
 
 
@@ -122,6 +123,28 @@ class PromptGenerator:
         return PromptType.FUNCTION_DEFINITION_DYNAMIC.value.replace(
             "{USER_PROMPT}", prompt
         )
+
+    def get_function_params_dynamic_prompt(
+        self,
+        function: FunctionDefinitionModel,
+        user_prompt: str,
+        : dict[str, TypeSpec],
+    ):
+        formated_params: str = self.__formated_parameters(params)
+        return (
+            PromptType.FUNCTION_PARAMETER_DYNAMIC.value.replace(
+                "{FUNCTION}", function.name
+            )
+            .replace("{PARAMETER_NAME}", parameter_name)
+            .replace("{PARAMETER_TYPE}", parameter_type)
+        )
+
+    def __formate_generated_parameters(self, generated_argument: dict[str, TypeSpec]) -> str:
+        res: str = ""
+        for param_name, param_type in params:
+            res += f"- Name: {param_name}\n"
+            res += f"- Type: {param_type}\n"
+        return res
 
     @property
     def get_fns_def_static_prompt(self) -> str:

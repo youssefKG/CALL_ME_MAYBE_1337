@@ -1,19 +1,17 @@
 from src.models.function_definition_model import FunctionDefinitionModel
-from src.predictors.fn_param_predictor import FunctionParamsPredicor
 from src.LlmModel.model import Model
 from src.cache.cache import Cache
 from collections.abc import Generator
 from src.prompts.prompt_generator import PromptGenerator
 import torch
-from src.utils.function_parameter import FunctionParameter
+from src.utils.function import FunctionParameter
 
 
-class FunctionParametreGenerator:
+class FunctionArgumentsGenerator:
 
     def __init__(
         self,
         prompt_generator: PromptGenerator,
-        param_predictor: FunctionParamsPredicor,
         user_prompt: str,
         function_definition: FunctionDefinitionModel,
         model: Model,
@@ -37,24 +35,36 @@ class FunctionParametreGenerator:
             arg_name, arg_type = argument
             self.__prepare_next_argument(arg_name, arg_type)
             if arg_type == "number":
-                pass
+                arg: str = self.__generate_param_number(arg_name)
+                print(arg)
             elif arg_type == "string":
                 pass
             else:
-                break
+                pass
             argument = next(arg_generator)
 
-    def __generate_function_argument(self, arg_name: str, arg_value: str) -> None:
-        i: int = 0
-        while i < 10:
-            logits: list[float] = self.__model.get_logits(self.__text_ids)
-            hight_score = torch.argmax(torch.tensor(logits))
-
-    def generate_param_number(self) -> int:
+    def __generate_param_number(self, arg_name: str) -> str:
         generated_ids: list[int] = list()
+        generated_tokens: str = str()
         possible_tokens: list[int] = self.__cache.get_numbers_ids
         while True:
-            pass
+            logits: list[float] = self.__model.get_logits(self.__text_ids)
+            for idx, _ in enumerate(logits):
+                if idx not in possible_tokens:
+                    logits[idx] = float("-inf")
+            high_score_id = int(torch.argmax(torch.tensor(logits)))
+            if high_score_id == self.__cache.im_end_id or generated_tokens.endswith(
+                "0" * 5
+            ):
+                break
+            generated_tokens += self.__model.decode(torch.tensor(high_score_id))
+            generated_ids.append(int(high_score_id))
+            self.__text_ids.append(int(high_score_id))
+        generated_arg_value: str = str(float(generated_tokens))
+        self.__generated_arguments.append(
+            FunctionParameter(arg_name, generated_arg_value)
+        )
+        return generated_arg_value
 
     def __set_dynamic_prompt(self, arg_name: str, arg_value: str) -> None:
         dynamic_prompt: str = (

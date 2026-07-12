@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.utils.function_parameter import FunctionParameter
+from src.utils.function import FunctionParameter
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
@@ -10,62 +10,67 @@ import json
 
 class PromptType(Enum):
     FUNCTIONS_DEFINITION_STATIC = """
-    Instructions:
-    - Read the available function definitions.
-    - Select the single function that best matches the user's request.
-    - Return ONLY the function name.
-    - Do not explain.
-    - Do not repeat the user request.
-    - If the best function is fn_add_numbers, output exactly: fn_add_numbers
-    - Do NOT output anything else.
+Instructions:
+- Read the available function definitions.
+- Select the single function that best matches the user's request.
+- Return ONLY the function name.
+- Do not explain.
+- Do not repeat the user request.
+- If the best function is fn_add_numbers, output exactly: fn_add_numbers
+- Do NOT output anything else.
 
-    Functions:
-    {FUNCTIONS}
-    """
+Functions:
+{FUNCTIONS}
+"""
 
     FUNCTION_DEFINITION_DYNAMIC = """
-    User request: {USER_PROMPT}
-    Answer: """
+User request: {USER_PROMPT}
+Answer: """
 
     FUNCTION_PARAMETER_STATIC = """
-    You are extracting one function argument at a time.
+You are extracting one function argument at a time.
 
-    You are given:
-    - The function definition.
-    - The user request.
-    - The arguments that have already been extracted.
+You are given:
+- The function definition.
+- The user request.
+- The arguments that have already been extracted.
 
-    Your task is to extract ONLY the requested parameter.
+Your task is to extract ONLY the requested parameter.
 
-    Rules:
-    - Return only the value.
-    - Use the required type.
-    - Use the already extracted arguments as context.
-    - Do not change previously extracted arguments.
-    - Do not invent values.
-    - If the value cannot be determined, return null.
-    - No JSON.
-    - No markdown.
-    - No explanations.
-    """
+Rules:
+- Return only the value.
+- Use the required type.
+- Use the already extracted arguments as context.
+- Do not change previously extracted arguments.
+- Do not invent values.
+- If the value cannot be determined, return null.
+- No JSON.
+- No markdown.
+- No explanations.
+
+-DO NOT execute the function.
+-DO NOT calculate the result.
+-DO NOT solve the user's request.
+Only determine the values that should be passed to the function.
+"""
 
     FUNCTION_PARAMETER_DYNAMIC = """
-    Function:
-    {FUNCTION}
+Function:
+{FUNCTION}
 
-    User request:
-    {USER_PROMPT}
+User request:
+{USER_PROMPT}
 
-    Parameter to extract:
-    - Name: {PARAMETER_NAME}
-    - Type: {PARAMETER_TYPE}
+Parameter to extract:
+- Name: {PARAMETER_NAME}
+- Type: {PARAMETER_TYPE}
 
-    Generated arguments:
-    {GENERATED_ARGUMENTS}
+Generated arguments:
+{GENERATED_ARGUMENTS}
 
-    Extract the value for the parameter "{PARAMETER_NAME}".
+Extract the value for the parameter "{PARAMETER_NAME}".
 
-    Answer: """
+Answer: """
 
 
 class PromptGenerator:
@@ -148,9 +153,11 @@ class PromptGenerator:
     def __format_generated_argument(
         self, generated_argument: list[FunctionParameter]
     ) -> str:
-        res: str = ""
-        for arguement in generated_argument:
-            res += f"- Name: {arguement.name}\nType: {arguement.value}\n"
+        res: str = str()
+        for arg in generated_argument:
+            res += '-{"Name: {NAME}, Value: {VALUE}}\n'.replace(
+                "{NAME}", arg.name
+            ).replace("{VALUE}", arg.value)
         return res
 
     @property

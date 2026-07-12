@@ -4,16 +4,18 @@ from collections.abc import Generator
 
 import sys
 
+from src.utils.function import FunctionCall
+
 
 def main() -> None:
     parser: Parser = Parser(sys.argv)
     parser.parse()
     output_generator: OutputGenerator = OutputGenerator(parser)
-    fn_name_generator: Generator[str | None] = output_generator.generate_function_name()
-    fn_name = next(fn_name_generator)
-    while fn_name:
-        print(fn_name)
-        fn_name = next(fn_name_generator)
+    fn_name_generator: Generator[FunctionCall | None] = output_generator.generate()
+    function_call: FunctionCall | None = next(fn_name_generator)
+    while function_call:
+        print(function_call.name)
+        function_call = next(fn_name_generator)
 
 
 if __name__ == "__main__":

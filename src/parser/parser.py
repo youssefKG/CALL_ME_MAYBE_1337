@@ -43,7 +43,7 @@ class Parser:
         return self.__prompts
 
     @property
-    def get_fns_def(self) -> list[FunctionDefinitionModel]:
+    def get_functions_definition(self) -> list[FunctionDefinitionModel]:
         return self.__function_defintions
 
     def get_fns_def_names(self) -> set[str]:

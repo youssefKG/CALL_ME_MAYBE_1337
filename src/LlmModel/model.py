@@ -31,8 +31,3 @@ class Model(Small_LLM_Model):
     @override
     def decode(self, ids: torch.Tensor | list[int]) -> str:
         return super().decode(ids)
-
-
-if __name__ == "__main__":
-    model = Model()
-    print(text_ids)

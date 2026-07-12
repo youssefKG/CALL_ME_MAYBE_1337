@@ -1,18 +1,15 @@
-from models.function_definition_model import FunctionDefinitionModel
+from src.models.function_definition_model import FunctionDefinitionModel
 from src.predictors.fn_param_predictor import FunctionParamsPredicor
 from src.LlmModel.model import Model
-from src.prompts.prompt_generator import PromptGenerator
 from src.cache.cache import Cache
 from collections.abc import Generator
-
-
-class FunctionParameter:
-    def __init__(self, name: str, value: str) -> None:
-        self.name: str = name
-        self.value: str = value
+from src.prompts.prompt_generator import PromptGenerator
+import torch
+from src.utils.function_parameter import FunctionParameter
 
 
 class FunctionParametreGenerator:
+
     def __init__(
         self,
         prompt_generator: PromptGenerator,
@@ -22,8 +19,8 @@ class FunctionParametreGenerator:
         model: Model,
         cache: Cache,
     ) -> None:
+
         self.__prompt_generator: PromptGenerator = prompt_generator
-        self.__generated_ids: list[int] = list()
         self.__text_ids: list[int] = list()
         self.__model: Model = model
         self.__generated_arguments: list[FunctionParameter] = list()
@@ -37,12 +34,27 @@ class FunctionParametreGenerator:
         )
         argument: tuple[str, str] | None = next(arg_generator)
         while argument:
-            arg_name, arg_value = argument
+            arg_name, arg_type = argument
+            self.__prepare_next_argument(arg_name, arg_type)
+            if arg_type == "number":
+                pass
+            elif arg_type == "string":
+                pass
+            else:
+                break
             argument = next(arg_generator)
-            self.__prepare_next_argument(arg_name, arg_value)
 
-    def generate_function_argument(self, arg_name: str, arg_value: str) -> None:
-        pass
+    def __generate_function_argument(self, arg_name: str, arg_value: str) -> None:
+        i: int = 0
+        while i < 10:
+            logits: list[float] = self.__model.get_logits(self.__text_ids)
+            hight_score = torch.argmax(torch.tensor(logits))
+
+    def generate_param_number(self) -> int:
+        generated_ids: list[int] = list()
+        possible_tokens: list[int] = self.__cache.get_numbers_ids
+        while True:
+            pass
 
     def __set_dynamic_prompt(self, arg_name: str, arg_value: str) -> None:
         dynamic_prompt: str = (
@@ -63,9 +75,8 @@ class FunctionParametreGenerator:
     def __next_argument_generator(self) -> Generator[tuple[str, str] | None]:
         for arg_name, arg in self.__function_definition.parameters.items():
             yield (arg_name, arg.type)
-
         yield None
 
     def __prepare_next_argument(self, arg_name: str, arg_type: str) -> None:
         self.__set_static_prompt_ids()
-        self.__set_static_prompt_ids()
+        self.__set_dynamic_prompt(arg_name, arg_type)

@@ -1,10 +1,9 @@
 from typing_extensions import override
 from llm_sdk.llm_sdk import Small_LLM_Model
-from src.utils.singleton import Singleton
 import torch
 
 
-class Model(Singleton, Small_LLM_Model):
+class Model(Small_LLM_Model):
 
     def __init__(
         self,
@@ -32,3 +31,8 @@ class Model(Singleton, Small_LLM_Model):
     @override
     def decode(self, ids: torch.Tensor | list[int]) -> str:
         return super().decode(ids)
+
+
+if __name__ == "__main__":
+    model = Model()
+    print(text_ids)

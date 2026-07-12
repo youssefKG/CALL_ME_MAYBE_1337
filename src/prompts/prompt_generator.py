@@ -1,6 +1,6 @@
 from enum import Enum
 
-from generator.function_parametre_generator import FunctionParameter
+from src.utils.function_parameter import FunctionParameter
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
@@ -65,8 +65,7 @@ class PromptType(Enum):
 
     Extract the value for the parameter "{PARAMETER_NAME}".
 
-    Answer:
-    """
+    Answer: """
 
 
 class PromptGenerator:

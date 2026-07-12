@@ -1,5 +1,5 @@
 from src.parser.parser import Parser
-from src.generator.generator import OutputGenerator
+from src.generator.output_generator import OutputGenerator
 from collections.abc import Generator
 
 import sys

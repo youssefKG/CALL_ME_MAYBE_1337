@@ -1,5 +1,17 @@
 [
   {
+    "prompt": "Replace all vowels in 'Programming is fun' with asterisks"
+  },
+  {
+    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+  },
+  {
+    "prompt": "Greet shrek"
+  },
+  {
+    "prompt": "Reverse the string 'world'"
+  },
+  {
     "prompt": "What is the sum of 265 and 345?"
   },
   {
@@ -22,9 +34,6 @@
   },
   {
     "prompt": "Calculate the square root of 144"
-  },
-  {
-    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
   },
   {
     "prompt": "Replace all vowels in 'Programming is fun' with asterisks"

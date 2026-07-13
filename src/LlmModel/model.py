@@ -31,3 +31,12 @@ class Model(Small_LLM_Model):
     @override
     def decode(self, ids: torch.Tensor | list[int]) -> str:
         return super().decode(ids)
+
+    def get_masked_logits(
+        self, text_ids: list[int], hight_score_ids: list[int]
+    ) -> list[float]:
+        logits: list[float] = self.get_logits_from_input_ids(text_ids)
+        for idx, _ in enumerate(logits):
+            if idx not in hight_score_ids:
+                logits[idx] = float("-inf")
+        return logits

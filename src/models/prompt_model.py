@@ -1,12 +1,11 @@
 from typing import final
 
 from pydantic import BaseModel, RootModel, ConfigDict
-from typing_extensions import override
 
 
 class PromptModel(BaseModel):
-    prompt: str
     model_config: ConfigDict = ConfigDict(extra="forbid")
+    prompt: str
 
 
 class PromptsRootModel(RootModel[list[PromptModel]]): ...

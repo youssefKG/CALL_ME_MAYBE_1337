@@ -8,6 +8,7 @@ from src.cache.cache import Cache
 from src.utils.function import FunctionCall
 from .function_name_generator import FunctionNameGenerator
 from .function_parametre_generator import FunctionArgumentsGenerator
+import src.constants.constants as constants
 
 
 class OutputGenerator:
@@ -74,6 +75,13 @@ class OutputGenerator:
         )
         self.__cache.set_im_end_id(im_end_id)
         self.__set_numbers_ids_to_cache()
+        self.__set_ascii_code_to_cache()
+
+    def __set_ascii_code_to_cache(self) -> None:
+        ascii_ids: list[int] = list()
+        for ascci_char in constants.ASCII:
+            ascii_ids += self.__model.encode_text(ascci_char)
+        self.__cache.set_ascii_ids(ascii_ids)
 
     def __init_functions_name_predictor(self) -> None:
         fns_def_names_ids: list[list[int]] = list()
@@ -83,21 +91,7 @@ class OutputGenerator:
 
     def __set_numbers_ids_to_cache(self) -> None:
         res: list[int] = []
-        possible_digits: list[str] = [
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            ".",
-            "-",
-        ]
-        for x in possible_digits:
+        for x in constants.NUMBERS:
             res += self.__model.encode_text(x)
         self.__cache.set_numbers_ids(res)
 

@@ -13,3 +13,5 @@ https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output#the
 
 ### Prefix tree:
 https://polaris000.medium.com/understanding-prefix-trees-13da74b3cafb
+
+fine tuning = https://comfyai.app/article/llm-hands-on-practice/qwen3-ift

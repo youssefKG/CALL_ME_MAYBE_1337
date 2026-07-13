@@ -36,10 +36,9 @@ class FunctionNameGenerator:
                     self.__generated_ids
                 )
             )
-            logits: list[float] = self.__model.get_logits(self.__text_ids)
-            for idx, _ in enumerate(logits):
-                if idx not in predicted_ids:
-                    logits[idx] = float("-inf")
+            logits: list[float] = self.__model.get_masked_logits(
+                self.__text_ids, predicted_ids
+            )
             high_score = torch.argmax(torch.tensor(logits))
             self.__add_next_token_id(int(high_score))
         self.__fn_name = "".join(self.__fn_name_list)

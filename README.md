@@ -28,3 +28,11 @@ fine tuning = https://comfyai.app/article/llm-hands-on-practice/qwen3-ift
 https://pr1nt.dev/posts/constrained-json-decoding/
 
 ### x grammar: https://xgrammar.mlc.ai/docs/structural_tag/tool_calling_and_reasoning.html
+
+### ollam that generate constraint decoding based on pydantic model
+
+https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md
+
+### constriant decoding:
+
+https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output

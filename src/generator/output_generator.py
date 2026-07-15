@@ -126,6 +126,6 @@ class OutputGenerator:
             vocab = json.loads(vocab_file.read())
         for token, token_id in vocab.items():
             clean_token = token.replace("Ġ", "").replace("Ċ", "\n")
-            self.__parsed_vocab[] = token_id
+            self.__parsed_vocab[clean_token] = token_id
         regex_constraint: RegexConstraint = RegexConstraint()
         regex_constraint.set_vocab(self.__parsed_vocab)

@@ -68,7 +68,6 @@ class FunctionArgumentsGenerator:
             ):
                 break
             token: str = self.__model.decode(torch.tensor(high_score_id))
-            print(token)
             generated_tokens += token
             generated_ids.append(int(high_score_id))
             self.__text_ids.append(int(high_score_id))
@@ -95,20 +94,13 @@ class FunctionArgumentsGenerator:
             if high_score_id == self.__cache.im_end_id or high_score_id == 151664:
                 break
 
-            print(high_score_id)
             token: str = self.__model.decode(torch.tensor(high_score_id))
-            print("generated token: ", token)
-            if token and (
-                token[-1].strip() == '"'
-                or token[-1].strip() == "}"
-                or token[-1].strip() == ","
-                or token[-1].strip().isspace()
-            ):
+            if token and ("," in token or '"' in token or "}" in token):
                 break
             generated_tokens += token
             generated_ids.append(high_score_id)
             self.__text_ids.append(high_score_id)
-            # print(token, end="", flush=True)
+            print(token, end="", flush=True)
             i += 1
         self.__generated_arguments.append(FunctionParameter(arg_name, generated_tokens))
 
@@ -122,9 +114,8 @@ class FunctionArgumentsGenerator:
                 arg_type,
             )
         )
-        # print(dynamic_prompt)
         dynamic_prompt_ids: list[int] = self.__model.encode_text(dynamic_prompt)
-        # print(dynamic_prompt, end="", flush=True)
+        print(dynamic_prompt, end="", flush=True)
         self.__text_ids += dynamic_prompt_ids
 
     def __set_static_prompt_ids(self) -> None:

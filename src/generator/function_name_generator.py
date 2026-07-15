@@ -26,7 +26,6 @@ class FunctionNameGenerator:
         self.__init_text_ids()
 
     def generate(self) -> None:
-        print(self.__prompt)
         while True:
             self.__predict_next_token()
             if self.__function_name_predictor.is_completed(self.__generated_ids):

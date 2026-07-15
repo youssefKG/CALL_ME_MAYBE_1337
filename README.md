@@ -36,3 +36,5 @@ https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md
 ### constriant decoding:
 
 https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output
+
+### how to use tools like Finite state machine and context free grammar to generate structered output

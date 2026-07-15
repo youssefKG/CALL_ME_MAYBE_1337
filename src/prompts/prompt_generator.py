@@ -38,15 +38,29 @@ Your task is to complete the "parameters" field using:
 - the function description,
 - and the user request.
 
-Rules:
-- Do not change the existing fields.
-- Only generate the "parameters" object.
-- Every parameter must match its declared type.
-- Use null for parameters whose values cannot be determined.
-- Do not execute the function.
-- Do not solve the user's request.
-- Do not invent unsupported values.
-- only complete the json format
+For each parameter:
+1. Read the parameter name and description.
+2. Search the user's request for an explicit value.
+3. If an explicit value exists, copy it exactly.
+4. Otherwise, determine whether the value can be logically inferred from the request.
+5. If it cannot be inferred with confidence, output null.
+6. Never invent information.
+<think>
+- Output only the completed JSON object with no surrounding text.
+</think>
+
+Examples:
+Answer: {
+"prompt": "What is the sum of 2 and 3?",
+"name": "fn_add_numbers",
+"parameters": {"a": 2.0, "b": 3.0}
+}
+
+Answer: {
+"prompt": "Reverse the string 'hello'",
+"name": "fn_reverse_string",
+"parameters": {"s": "hello"}
+}
 """
 
     FUNCTION_PARAMETER_DYNAMIC = """
@@ -66,7 +80,8 @@ User request:
 {"</think>
     "name": "{FUNCTION_NAME}",
     "prompt": "{USER_PROMPT}",
-    "parameters": {{GENERATED_ARGUMENTS}"""
+    "parameters": {
+        {GENERATED_ARGUMENTS}"""
 
 
 class PromptGenerator:
@@ -155,7 +170,7 @@ class PromptGenerator:
     ) -> str:
         res: str = str()
         for idx, arg in enumerate(generated_argument):
-            res += '{"name": "{NAME}", "value": {VALUE}}, \n'.replace(
+            res += '    {"name": "{NAME}", "value": {VALUE}}, \n'.replace(
                 "{NAME}", arg.name
             )
             if arg_type == "string":
@@ -163,7 +178,7 @@ class PromptGenerator:
             else:
                 res = res.replace("{VALUE}", arg.value)
 
-        res += '{"name": "{ARG_NAME}", "value": '.replace("{ARG_NAME}", arg_name)
+        res += '    {"name": "{ARG_NAME}", "value": '.replace("{ARG_NAME}", arg_name)
         if arg_type == "string":
             res += '"'
         return res

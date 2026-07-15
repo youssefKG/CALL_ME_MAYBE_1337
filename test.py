@@ -1,39 +1,36 @@
-from pydantic import BaseModel
-from schema_converter import SchemaConverter
-import json
-import sys
-import argparse
+import asyncio
+import time
 
 
-class B(BaseModel):
-    function_name: str
-    parameters: dict[str, str]
+async def worker(worker_id, delay):
+    print(f"Worker {worker_id} starting...")
+    # Pause without freezing the entire script
+    await asyncio.sleep(delay)
+    print(f"Worker {worker_id} finished after {delay}s!")
 
 
-def main() -> None:
-
-    parser = argparse.ArgumentParser(
-        description="""
-            Generates a grammar (suitable for use in ./llama-cli) that produces JSON conforming to a
-            given JSON schema. Only a subset of JSON schema features are supported; more may be
-            added in the future.
-        """,
-    )
-
-    parser.add_argument(
-        "--raw-pattern",
-        type=str,
-        help="Treats string patterns as raw patterns w/o quotes (or quote escapes)",
-    )
-
-    parser.add_argument("schema", help='file containing JSON schema ("-" for stdin)')
-    args = parser.parse_args(sys.argv)
-    model_json = json.dumps(B.model_json_schema(), indent=2)
-    # args.model_json = model_json
-    # schemaConvert = schemaConverter()
-    print(args.prop_order)
-
-    print()
+async def hello(time: int):
+    while True:
+        await asyncio.sleep(3)
+        print("hello")
 
 
-main()
+async def test_one():
+    while True:
+        await asyncio.sleep(1)
+        print("test one")
+
+
+async def test():
+    await asyncio.gather(hello(3), test_one())
+
+
+def main():
+    asyncio.run(test())
+    print("main")
+
+
+if __name__ == "__main__":
+    start_time = time.perf_counter()
+    # Start the event loop and run main
+    main()

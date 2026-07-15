@@ -19,6 +19,7 @@ class Model(Small_LLM_Model):
             dtype=dtype,
             trust_remote_code=trust_remote_code,  # constructor
         )
+        self.get_vocab()
 
     def encode_text(self, text: str) -> list[int]:
         text_ids: list[int] = [int(x) for x in super().encode(text).flatten()]
@@ -40,3 +41,9 @@ class Model(Small_LLM_Model):
             if idx not in hight_score_ids:
                 logits[idx] = float("-inf")
         return logits
+
+    def get_vocab(self) -> None:
+        print(self.get_path_to_vocab_file())
+
+    def __soft_max(self) -> None:
+        pass

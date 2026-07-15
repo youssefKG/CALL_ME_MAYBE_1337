@@ -29,28 +29,24 @@ Answer: """
 
     FUNCTION_PARAMETER_STATIC = """
 <|im_start|>
-You are extracting one function argument at a time.
+You are completing a function call.
 
-You are given:
-- The function definition.
-- The function description.
-- The user request.
-- The arguments that have already been extracted.
+The selected function has already been determined.
 
-Your task is to extract ONLY the requested parameter.
+Your task is to complete the "parameters" field using:
+- the function definition,
+- the function description,
+- and the user request.
 
 Rules:
-- Return only the value.
-- Use the function description and the already extracted arguments as context.
-- Do not change previously extracted arguments.
-- Do not invent values.
-- If the value cannot be determined, return null.
-- No JSON.
-- No explanations.
-- DO NOT execute the function.
-- DO NOT calculate the result.
-- DO NOT solve the user's request.
-- Only determine the values that should be passed to the function.
+- Do not change the existing fields.
+- Only generate the "parameters" object.
+- Every parameter must match its declared type.
+- Use null for parameters whose values cannot be determined.
+- Do not execute the function.
+- Do not solve the user's request.
+- Do not invent unsupported values.
+- only complete the json format
 """
 
     FUNCTION_PARAMETER_DYNAMIC = """
@@ -62,19 +58,15 @@ Description:
 
 User request:
 {USER_PROMPT}
-
-Parameter to extract:
-- Name: {PARAMETER_NAME}
-- Type: {PARAMETER_TYPE}
-
-Generated arguments:
-{GENERATED_ARGUMENTS}
-
-Extract the value for the parameter "{PARAMETER_NAME}".
 <|im_end|>
 
+<think>
+
 <|im_start|>Answer:
-"""
+{"</think>
+    "name": "{FUNCTION_NAME}",
+    "prompt": "{USER_PROMPT}",
+    "parameters": {{GENERATED_ARGUMENTS}"""
 
 
 class PromptGenerator:
@@ -150,19 +142,30 @@ class PromptGenerator:
             .replace("{PARAMETER_TYPE}", arg_type)
             .replace(
                 "{GENERATED_ARGUMENTS}",
-                self.__format_generated_argument(generated_arguments),
+                self.__format_generated_argument(
+                    generated_arguments, arg_name, arg_type
+                ),
             )
             .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
+            .replace("{FUNCTION_NAME}", function_definition.name)
         )
 
     def __format_generated_argument(
-        self, generated_argument: list[FunctionParameter]
+        self, generated_argument: list[FunctionParameter], arg_name: str, arg_type: str
     ) -> str:
         res: str = str()
-        for arg in generated_argument:
-            res += '-{"Name: {NAME}, Value: {VALUE}}\n'.replace(
+        for idx, arg in enumerate(generated_argument):
+            res += '{"name": "{NAME}", "value": {VALUE}}, \n'.replace(
                 "{NAME}", arg.name
-            ).replace("{VALUE}", arg.value)
+            )
+            if arg_type == "string":
+                res = res.replace("{VALUE}", f'"{arg.value}"')
+            else:
+                res = res.replace("{VALUE}", arg.value)
+
+        res += '{"name": "{ARG_NAME}", "value": '.replace("{ARG_NAME}", arg_name)
+        if arg_type == "string":
+            res += '"'
         return res
 
     @property

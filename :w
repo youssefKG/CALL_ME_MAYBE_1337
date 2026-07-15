@@ -7,7 +7,7 @@ from src.parser.parser import Parser
 from src.prompts.prompt_generator import PromptGenerator
 from src.cache.cache import Cache
 from src.utils.function import FunctionCall
-from src.constraints.regex_constraint import RegexConstraint
+from src.constants.regex_constraint import RegexConstraint
 from .function_name_generator import FunctionNameGenerator
 from .function_parametre_generator import FunctionArgumentsGenerator
 import src.constants.constants as constants
@@ -28,12 +28,10 @@ class OutputGenerator:
             .build()
         )
         self.__function_calls: list[FunctionCall] = list()
-        self.__parsed_vocab: dict[str, int] = dict()
 
         self.__function_name_predictor: FunctionNamePredictor
-        self.__function_parameters_predictor: FunctionParametersPredictor = (
-            FunctionParametersPredictor(self.__cache)
-        )
+        self.__function_parameters_predictor: FunctionParametersPredictor
+
         self.__init_regex_constraint()
         self.__init_cache()
         self.__init_functions_name_predictor()
@@ -82,6 +80,15 @@ class OutputGenerator:
 
     def __init_function_prameteres_predictor(self) -> None:
         self.__function_parameters_predictor = FunctionParametersPredictor(self.__cache)
+        vocab_path: str = self.__model.get_path_to_vocab_file()
+        vocab_body: dict[str, int]
+
+        with open(vocab_path, "r") as vocab_file:
+            vocab_body = json.loads(vocab_file.read())
+        parsed_vocab: dict[str, int] = dict()
+        for name, val in vocab_body.items():
+            parsed_vocab[name.replace("Ġ", "")] = val
+        self.__function_parameters_predictor.set_vocab(parsed_vocab)
 
     def __init_functions_name_predictor(self) -> None:
         self.__function_name_predictor = FunctionNamePredictor()
@@ -122,10 +129,10 @@ class OutputGenerator:
     def __init_regex_constraint(self):
         vocab_path: str = self.__model.get_path_to_vocab_file()
         vocab: dict[str, int]
+        parsed_vocab: dict[str, int] = dict()
         with open(vocab_path, "r") as vocab_file:
-            vocab = json.loads(vocab_file.read())
+            vocab_body = json.loads(vocab_file.read())
         for token, token_id in vocab.items():
-            clean_token = token.replace("Ġ", "").replace("Ċ", "\n")
-            self.__parsed_vocab[] = token_id
-        regex_constraint: RegexConstraint = RegexConstraint()
-        regex_constraint.set_vocab(self.__parsed_vocab)
+            parsed_vocab[token.replace("Ġ", "")]
+        regex_constraint: RegexConstraint = RegexConstraint
+        regex_constraint.set_vocab(vocab)

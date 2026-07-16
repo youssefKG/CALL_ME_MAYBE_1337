@@ -1,5 +1,3 @@
-from transformers import LayoutLMModel
-
 from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.LlmModel.model import Model
@@ -41,6 +39,7 @@ class FunctionArgumentsGenerator:
         while argument:
             arg_name, arg_type = argument
             self.__prepare_next_argument(arg_name, arg_type)
+            self.__log_text_ids()
             match arg_type:
                 case "number":
                     self.__generate_param_number(arg_name)
@@ -59,15 +58,16 @@ class FunctionArgumentsGenerator:
                     generated_tokens, "number"
                 )
             )
-            logits: list[float] = self.__model.get_masked_logits(
-                self.__text_ids, possible_tokens
-            )
+            logits: list[float] = self.__model.get_logits(self.__text_ids)
             high_score_id = int(torch.argmax(torch.tensor(logits)))
             if high_score_id == self.__cache.im_end_id or generated_tokens.endswith(
                 "0" * 3
             ):
                 break
             token: str = self.__model.decode(torch.tensor(high_score_id))
+            if token and ("," in token or '"' in token or "}" in token):
+                break
+            print(token, end="", flush=True)
             generated_tokens += token
             generated_ids.append(int(high_score_id))
             self.__text_ids.append(int(high_score_id))
@@ -80,18 +80,10 @@ class FunctionArgumentsGenerator:
     def __generate_string(self, arg_name: str) -> None:
         generated_ids: list[int] = list()
         generated_tokens: str = str()
-        i: int = 0
-        while True and i < 30:
-            """
-            possible_tokens_ids: list[int] = (
-                self.__function_parameters_predictor.next_possible_tokens_ids(
-                    generated_tokens, "string"
-                )
-            )
-            """
+        while True:
             logits: list[float] = self.__model.get_logits(self.__text_ids)
             high_score_id: int = int(torch.argmax(torch.tensor(logits)))
-            if high_score_id == self.__cache.im_end_id or high_score_id == 151664:
+            if high_score_id == self.__cache.im_end_id:
                 break
 
             token: str = self.__model.decode(torch.tensor(high_score_id))
@@ -101,7 +93,6 @@ class FunctionArgumentsGenerator:
             generated_ids.append(high_score_id)
             self.__text_ids.append(high_score_id)
             print(token, end="", flush=True)
-            i += 1
         self.__generated_arguments.append(FunctionParameter(arg_name, generated_tokens))
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
@@ -115,17 +106,23 @@ class FunctionArgumentsGenerator:
             )
         )
         dynamic_prompt_ids: list[int] = self.__model.encode_text(dynamic_prompt)
-        print(dynamic_prompt, end="", flush=True)
+        # print(dynamic_prompt, end="", flush=True)
         self.__text_ids += dynamic_prompt_ids
 
     def __set_static_prompt_ids(self) -> None:
-        self.__text_ids = self.__cache.get_function_argument_static_prompt_ids
+        self.__text_ids = self.__cache.get_function_argument_static_prompt_ids.copy()
+
+    def __prepare_next_argument(self, arg_name: str, arg_type: str) -> None:
+        self.__set_static_prompt_ids()
+        self.__set_dynamic_prompt(arg_name, arg_type)
 
     def __next_argument_generator(self) -> Generator[tuple[str, str] | None]:
         for arg_name, arg in self.__function_definition.parameters.items():
             yield (arg_name, arg.type)
         yield None
 
-    def __prepare_next_argument(self, arg_name: str, arg_type: str) -> None:
-        self.__set_static_prompt_ids()
-        self.__set_dynamic_prompt(arg_name, arg_type)
+    def __log_text_ids(self) -> None:
+        print("-" * 40)
+        for token_id in self.__text_ids:
+            token = self.__model.decode(torch.tensor(token_id))
+            print(token, end="", flush=True)

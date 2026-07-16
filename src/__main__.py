@@ -14,7 +14,6 @@ def main() -> None:
     fn_name_generator: Generator[FunctionCall | None] = output_generator.generate()
     function_call: FunctionCall | None = next(fn_name_generator)
     while function_call:
-        print(function_call.name)
         function_call = next(fn_name_generator)
 
 

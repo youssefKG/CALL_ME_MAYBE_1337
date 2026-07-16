@@ -11,23 +11,17 @@ class RegexConstraint:
         return cls.__instance
 
     def __init__(self):
-        self.__vocab: dict[str, int]
+        self.__vocab: dict[str, int] = dict()
         self.__regex_number_pattern: re.Pattern[str] = re.compile(
             r"/^[+-]?\d+(?:\.\d+)?$/"
         )
         self.__regex_string_pattern: re.Pattern[str] = re.compile(r"^[\x00-\x7F]*$")
+        self.__strings_ids: list[float] = list()
 
     def get_valid_tokens(self, pattern: str, current: str) -> list[int]:
-        regex = re.compile(pattern)
-        valid: list[int] = []
-        for token, token_id in self.__vocab.items():
-            candidate = current + token
-            if regex.match(candidate):
-                valid.append(token_id)
-        return valid
+        return list(self.__vocab.values())
 
     def set_vocab(self, vocab: dict[str, int]) -> None:
-        self.__vocab = dict()
         for token, token_id in vocab.items():
             if self.__regex_string_pattern.match(token):
                 self.__vocab[token] = token_id

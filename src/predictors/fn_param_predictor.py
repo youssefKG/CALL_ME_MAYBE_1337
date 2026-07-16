@@ -13,9 +13,7 @@ class FunctionParametersPredictor:
         tokens_ids: list[int] = list()
         match arg_type:
             case "number":
-                return self.__regex_constraint.get_valid_tokens(
-                    self.__number_pattern, content
-                )
+                return self.__cache.get_numbers_ids
             case "string":
                 return self.__regex_constraint.get_valid_tokens(
                     self.__string_pattern, content

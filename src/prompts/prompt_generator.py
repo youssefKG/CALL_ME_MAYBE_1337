@@ -153,23 +153,21 @@ class PromptGenerator:
                 "{FUNCTION}", self.__format_the_function_prototype(function_definition)
             )
             .replace("{USER_PROMPT}", user_prompt)
-            .replace("{PARAMETER_NAME}", arg_name)
-            .replace("{PARAMETER_TYPE}", arg_type)
+            .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
+            .replace("{FUNCTION_NAME}", function_definition.name)
             .replace(
                 "{GENERATED_ARGUMENTS}",
                 self.__format_generated_argument(
                     generated_arguments, arg_name, arg_type
                 ),
             )
-            .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
-            .replace("{FUNCTION_NAME}", function_definition.name)
         )
 
     def __format_generated_argument(
         self, generated_argument: list[FunctionParameter], arg_name: str, arg_type: str
     ) -> str:
         res: str = str()
-        for idx, arg in enumerate(generated_argument):
+        for arg in generated_argument:
             res += '    {"name": "{NAME}", "value": {VALUE}}, \n'.replace(
                 "{NAME}", arg.name
             )

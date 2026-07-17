@@ -1,90 +1,89 @@
-from enum import Enum
-
 from src.utils.function import FunctionParameter
+
+from enum import Enum
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
 from collections.abc import Generator
+
 import json
 
 
-class PromptType(Enum):
-    FUNCTIONS_DEFINITION_STATIC = """
-Instructions:
-- Read the available function definitions.
-- Select the single function that best matches the user's request.
-- Return ONLY the function name.
-- Do not explain.
-- Do not repeat the user request.
-- If the best function is fn_add_numbers, output exactly: fn_add_numbers
-- Do NOT output anything else.
-
-Functions:
-{FUNCTIONS}
-"""
-
-    FUNCTION_DEFINITION_DYNAMIC = """
-User request: {USER_PROMPT}
-Answer: """
-
-    FUNCTION_PARAMETER_STATIC = """
-<|im_start|>
-You are completing a function call.
-
-The selected function has already been determined.
-
-Your task is to complete the "parameters" field using:
-- the function definition,
-- the function description,
-- and the user request.
-
-For each parameter:
-1. Read the parameter name and description.
-2. Search the user's request for an explicit value.
-3. If an explicit value exists, copy it exactly.
-4. Otherwise, determine whether the value can be logically inferred from the request.
-5. If it cannot be inferred with confidence, output null.
-6. Never invent information.
-<think>
-- Output only the completed JSON object with no surrounding text.
-</think>
-
-Examples:
-Answer: {
-"prompt": "What is the sum of 2 and 3?",
-"name": "fn_add_numbers",
-"parameters": {"a": 2.0, "b": 3.0}
-}
-
-Answer: {
-"prompt": "Reverse the string 'hello'",
-"name": "fn_reverse_string",
-"parameters": {"s": "hello"}
-}
-"""
-
-    FUNCTION_PARAMETER_DYNAMIC = """
-Function:
-{FUNCTION}
-
-Description:
-{FUNCTION_DESCRIPTION}
-
-User request:
-{USER_PROMPT}
-<|im_end|>
-
-<think>
-
-<|im_start|>Answer:
-{"</think>
-    "name": "{FUNCTION_NAME}",
-    "prompt": "{USER_PROMPT}",
-    "parameters": {
-        {GENERATED_ARGUMENTS}"""
-
-
 class PromptGenerator:
+    class PromptType(str, Enum):
+        FUNCTIONS_DEFINITION_STATIC = """
+    Instructions:
+    - Read the available function definitions.
+    - Select the single function that best matches the user's request.
+    - Return ONLY the function name.
+    - Do not explain.
+    - Do not repeat the user request.
+    - If the best function is fn_add_numbers, output exactly: fn_add_numbers
+    - Do NOT output anything else.
+
+    Functions:
+    {FUNCTIONS}
+    """
+
+        FUNCTION_DEFINITION_DYNAMIC = """
+    User request: {USER_PROMPT}
+    Answer: """
+
+        FUNCTION_PARAMETER_STATIC = """
+    <|im_start|>
+    You are completing a function call.
+
+    The selected function has already been determined.
+
+    Your task is to complete the "parameters" field using:
+    - the function definition,
+    - the function description,
+    - and the user request.
+
+    For each parameter:
+    1. Read the parameter name and description.
+    2. Search the user's request for an explicit value.
+    3. If an explicit value exists, copy it exactly.
+    4. Otherwise, determine whether the value can be logically inferred from the request.
+    5. If it cannot be inferred with confidence, output null.
+    6. Never invent information.
+    <think>
+    - Output only the completed JSON object with no surrounding text.
+    </think>
+
+    Examples:
+    Answer: {
+    "prompt": "What is the sum of 2 and 3?",
+    "name": "fn_add_numbers",
+    "parameters": {"a": 2.0, "b": 3.0}
+    }
+
+    Answer: {
+    "prompt": "Reverse the string 'hello'",
+    "name": "fn_reverse_string",
+    "parameters": {"s": "hello"}
+    }
+    """
+
+        FUNCTION_PARAMETER_DYNAMIC = """
+    Function:
+    {FUNCTION}
+
+    Description:
+    {FUNCTION_DESCRIPTION}
+
+    User request:
+    {USER_PROMPT}
+    <|im_end|>
+
+    <think>
+
+    <|im_start|>Answer:
+    {"</think>
+        "name": "{FUNCTION_NAME}",
+        "prompt": "{USER_PROMPT}",
+        "parameters": {
+            {GENERATED_ARGUMENTS}"""
 
     class Builder:
         def __init__(
@@ -99,14 +98,16 @@ class PromptGenerator:
 
         def set_fns_def_static_prompt(self) -> Self:
             self.fns_def_static_prompt = (
-                PromptType.FUNCTIONS_DEFINITION_STATIC.value.replace(
+                PromptGenerator.PromptType.FUNCTIONS_DEFINITION_STATIC.value.replace(
                     "{FUNCTIONS}", self.__get_fns_def
                 )
             )
             return self
 
         def set_params_static_prompt(self) -> Self:
-            self.fn_params_static_prompt = PromptType.FUNCTION_PARAMETER_STATIC.value
+            self.fn_params_static_prompt = (
+                PromptGenerator.PromptType.FUNCTION_PARAMETER_STATIC.value
+            )
             return self
 
         def build(self) -> "PromptGenerator":
@@ -135,7 +136,7 @@ class PromptGenerator:
         yield None
 
     def get_fns_def_dynamic_prompt(self, prompt: str) -> str:
-        return PromptType.FUNCTION_DEFINITION_DYNAMIC.value.replace(
+        return PromptGenerator.PromptType.FUNCTION_DEFINITION_DYNAMIC.value.replace(
             "{USER_PROMPT}", prompt
         )
 
@@ -149,7 +150,7 @@ class PromptGenerator:
     ) -> str:
 
         return (
-            PromptType.FUNCTION_PARAMETER_DYNAMIC.value.replace(
+            PromptGenerator.PromptType.FUNCTION_PARAMETER_DYNAMIC.value.replace(
                 "{FUNCTION}", self.__format_the_function_prototype(function_definition)
             )
             .replace("{USER_PROMPT}", user_prompt)

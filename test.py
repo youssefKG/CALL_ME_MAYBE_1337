@@ -1,36 +1,60 @@
-import asyncio
-import time
+from enum import Enum
+from collections.abc import Callable
 
 
-async def worker(worker_id, delay):
-    print(f"Worker {worker_id} starting...")
-    # Pause without freezing the entire script
-    await asyncio.sleep(delay)
-    print(f"Worker {worker_id} finished after {delay}s!")
+class NumberState(str, Enum):
+    START = "-+0123456789"
+    SIGN = "0123456789"
+    INTEGER = "0123456789."
+    FRACTION = "0123456789"
+    FINAL = ","
 
 
-async def hello(time: int):
-    while True:
-        await asyncio.sleep(3)
-        print("hello")
+def create_number_predictror() -> Callable[[str], NumberState]:
+    next_state: NumberState = NumberState.START
+
+    def next_possible_tokens(num: str) -> NumberState:
+        nonlocal next_state
+        for c in num:
+            match next_state:
+                case NumberState.START:
+                    if c in "-+":
+                        next_state = NumberState.SIGN
+                        print("sign")
+                    elif c in NumberState.SIGN.value:
+                        next_state = NumberState.INTEGER
+                        print("integer")
+                case NumberState.SIGN:
+                    next_state = NumberState.INTEGER
+                    print("interger from sign")
+                case NumberState.INTEGER:
+                    if c == ",":
+                        next_state = NumberState.FINAL
+                        print("final")
+                    elif c == ".":
+                        next_state = NumberState.FRACTION
+                        print("fraction")
+                case NumberState.FRACTION:
+                    if c not in NumberState.FRACTION:
+                        next_state = NumberState.FINAL
+                        print("final")
+                case NumberState.FINAL:
+                    ...
+
+        return next_state
+
+    return next_possible_tokens
 
 
-async def test_one():
-    while True:
-        await asyncio.sleep(1)
-        print("test one")
-
-
-async def test():
-    await asyncio.gather(hello(3), test_one())
-
-
-def main():
-    asyncio.run(test())
-    print("main")
+def main() -> None:
+    number_predictor_generator: Callable[[str], NumberState] = (
+        create_number_predictror()
+    )
+    num: str = "-1.23"
+    number_predictor: NumberState = number_predictor_generator(num)
+    print(number_predictor.value)
 
 
 if __name__ == "__main__":
-    start_time = time.perf_counter()
-    # Start the event loop and run main
     main()
+    pass

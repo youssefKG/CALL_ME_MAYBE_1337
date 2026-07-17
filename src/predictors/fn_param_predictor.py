@@ -1,5 +1,15 @@
 from src.cache.cache import Cache
 from src.constraints.regex_constraint import RegexConstraint
+from collections.abc import Callable
+from enum import Enum
+
+
+class NumberState(str, Enum):
+    START = "0123456789.-+"
+    INTEGER = "0123456789"
+    DICIMAL_POINT = "."
+    FRACTION = "0123456789"
+    FINAL = ","
 
 
 class FunctionParametersPredictor:
@@ -23,3 +33,20 @@ class FunctionParametersPredictor:
             case _:
                 pass
         return tokens_ids
+
+    def create_number_predictror(self) -> Callable[[str], NumberState]:
+        prev_state: NumberState = NumberState.START
+        last_index: int = 0
+
+        def next_state(num: str) -> NumberState:
+            nonlocal prev_state
+            nonlocal last_index
+            last_index += 1
+            if last_index < len(num):
+                return NumberState.FINAL
+            while last_index < len(num):
+                pass
+
+            return prev_state
+
+        return next_state

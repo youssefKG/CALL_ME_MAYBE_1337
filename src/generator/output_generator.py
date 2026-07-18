@@ -99,9 +99,12 @@ class OutputGenerator:
             self.__cache.set_ascii_ids(ascii_ids)
 
         def __set_numbers_ids_to_cache() -> None:
+            tokens: str = "0-1234567+8,9."
             res: list[int] = []
-            for x in constants.NUMBERS:
-                res += self.__model.encode_text(x)
+
+            for t in tokens:
+                token_id: int = self.__model.encode_text(t)[0]
+                self.__cache.add_token(t, token_id)
             self.__cache.set_numbers_ids(res)
 
         encoded_fns_def_names_ids: list[int] = self.__model.encode_text(

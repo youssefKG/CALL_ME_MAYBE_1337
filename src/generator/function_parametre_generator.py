@@ -1,4 +1,4 @@
-from src.predictors.fn_param_predictor import FunctionParametersPredictor
+from src.predictors.fn_param_predictor import FunctionParametersPredictor, NumberState
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.LlmModel.model import Model
 from src.cache.cache import Cache
@@ -51,27 +51,34 @@ class FunctionArgumentsGenerator:
 
     def __generate_param_number(self, arg_name: str) -> str:
         generated_ids: list[int] = list()
-        generated_tokens: str = str()
+        generated_number: str = str()
+        next_state_for_number: NumberState = (
+            self.__function_parameters_predictor.next_state_for_number(generated_number)
+        )
         while True:
             possible_tokens: list[int] = (
                 self.__function_parameters_predictor.next_possible_tokens_ids(
-                    generated_tokens, "number"
+                    generated_number, "number"
                 )
             )
-            logits: list[float] = self.__model.get_logits(self.__text_ids)
+            logits: list[float] = self.__model.get_masked_logits(
+                self.__text_ids, possible_tokens
+            )
             high_score_id = int(torch.argmax(torch.tensor(logits)))
-            if high_score_id == self.__cache.im_end_id or generated_tokens.endswith(
-                "0" * 3
-            ):
-                break
             token: str = self.__model.decode(torch.tensor(high_score_id))
-            if token and ("," in token or '"' in token or "}" in token):
-                break
             print(token, end="", flush=True)
-            generated_tokens += token
+            generated_number += token
+            next_state_for_number = (
+                self.__function_parameters_predictor.next_state_for_number(
+                    generated_number
+                )
+            )
+            if next_state_for_number == NumberState.FINAL:
+                generated_number = generated_number[:-1]
+                break
             generated_ids.append(int(high_score_id))
             self.__text_ids.append(int(high_score_id))
-        generated_arg_value: str = str(float(generated_tokens))
+        generated_arg_value: str = str(float(generated_number))
         self.__generated_arguments.append(
             FunctionParameter(arg_name, generated_arg_value)
         )
@@ -106,7 +113,6 @@ class FunctionArgumentsGenerator:
             )
         )
         dynamic_prompt_ids: list[int] = self.__model.encode_text(dynamic_prompt)
-        # print(dynamic_prompt, end="", flush=True)
         self.__text_ids += dynamic_prompt_ids
 
     def __set_static_prompt_ids(self) -> None:

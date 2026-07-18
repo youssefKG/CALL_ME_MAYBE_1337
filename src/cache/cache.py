@@ -9,6 +9,7 @@ class Cache(Singleton):
         self.__numbers_ids: list[int] = list()
         self.__ascii_ids: list[int] = list()
         self.__null_ids: list[int] = list()
+        self.__number_tokens_ids: dict[str, int] = dict()
 
     @property
     def get_function_name_static_prompt_ids(self) -> list[int]:
@@ -51,3 +52,9 @@ class Cache(Singleton):
     @property
     def get_null_ids(self) -> list[int]:
         return self.__null_ids
+
+    def add_token(self, token: str, token_id: int) -> None:
+        self.__number_tokens_ids[token] = token_id
+
+    def get_token_id(self, token: str) -> int:
+        return self.__number_tokens_ids[token]

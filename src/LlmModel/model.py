@@ -37,9 +37,10 @@ class Model(Small_LLM_Model):
         self, text_ids: list[int], hight_score_ids: list[int]
     ) -> list[float]:
         logits: list[float] = self.get_logits_from_input_ids(text_ids)
-        for idx, _ in enumerate(logits):
-            if idx not in hight_score_ids:
-                logits[idx] = float("-inf")
+        if hight_score_ids:
+            for idx, _ in enumerate(logits):
+                if idx not in hight_score_ids:
+                    logits[idx] = float("-inf")
         return logits
 
     def get_vocab(self) -> None:

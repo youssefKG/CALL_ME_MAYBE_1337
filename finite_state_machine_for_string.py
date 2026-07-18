@@ -2,42 +2,38 @@ from enum import Enum
 
 
 class StringState(str, Enum):
-    START = '"'
-    OPEN_CONTENT = "any char"
-    OPEN_ESCAPE = "\\"
-    CLOSED_ESCAPE = '"\\nrtbf'
-    CLOSED_CONTENT = '"'
-    FINISH = ","
+    START = ""
+    OPEN_CONTENT = '"'
+    ESCAPE = '"\\nrtbf.*?$[]()+{}i^'
+    CONTENT = "any charactere"
+    CLOSED_CONTENT = ","
 
 
-def get_next_state(content: str) -> StringState:
+def next_string_state(string: str) -> StringState:
     current_state: StringState = StringState.START
-
-    for idx, ch in enumerate(content):
+    for ch in string:
         match current_state:
             case StringState.START:
-                if ch == "\\":
-                    current_state = StringState.OPEN_ESCAPE
-                elif ch == '"':
-                    pass
-                else:
-                    current_state = StringState.OPEN_CONTENT
-            case StringState.OPEN_ESCAPE:
-                current_state = StringState.CLOSED_ESCAPE
-            case StringState.CLOSED_ESCAPE:
                 current_state = StringState.OPEN_CONTENT
             case StringState.OPEN_CONTENT:
+                current_state = StringState.CONTENT
+            case StringState.CONTENT:
                 if ch == '"':
                     current_state = StringState.CLOSED_CONTENT
-                if ch == "\\":
-                    current_state = StringState.OPEN_ESCAPE
+                elif ch == "\\":
+                    current_state = StringState.ESCAPE
+            case StringState.ESCAPE:
+                current_state = StringState.CONTENT
             case StringState.CLOSED_CONTENT:
-                current_state = StringState.FINISH
-            case _:
                 pass
-
     return current_state
 
 
 def main() -> None:
-    pass
+    string: str = f'"1\\n\\""'
+    next_state: StringState = next_string_state(string)
+    print(next_state.name, next_state.value)
+
+
+if __name__ == "__main__":
+    main()

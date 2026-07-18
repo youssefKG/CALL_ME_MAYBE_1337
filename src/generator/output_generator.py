@@ -42,7 +42,7 @@ class OutputGenerator:
     def generate(self) -> Generator[FunctionCall | None]:
         prompt_generator: Generator[str | None] = self.__prompt_generator.next_prompt
         prompt: str | None = next(prompt_generator)
-        while prompt is not None:
+        while prompt:
             fn_name_generator: FunctionNameGenerator = FunctionNameGenerator(
                 self.__model,
                 self.__cache,

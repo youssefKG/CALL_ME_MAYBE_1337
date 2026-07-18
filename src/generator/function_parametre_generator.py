@@ -1,4 +1,8 @@
-from src.predictors.fn_param_predictor import FunctionParametersPredictor, NumberState
+from src.predictors.fn_param_predictor import (
+    FunctionParametersPredictor,
+    NumberState,
+    StringState,
+)
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.LlmModel.model import Model
 from src.cache.cache import Cache
@@ -85,22 +89,24 @@ class FunctionArgumentsGenerator:
         return generated_arg_value
 
     def __generate_string(self, arg_name: str) -> None:
-        generated_ids: list[int] = list()
-        generated_tokens: str = str()
-        while True:
-            logits: list[float] = self.__model.get_logits(self.__text_ids)
-            high_score_id: int = int(torch.argmax(torch.tensor(logits)))
-            if high_score_id == self.__cache.im_end_id:
-                break
-
-            token: str = self.__model.decode(torch.tensor(high_score_id))
-            if token and ("," in token or '"' in token or "}" in token):
-                break
-            generated_tokens += token
-            generated_ids.append(high_score_id)
-            self.__text_ids.append(high_score_id)
-            print(token, end="", flush=True)
+        generated_tokens: str = '"'
+        string_state: StringState = (
+            self.__function_parameters_predictor.next_string_state(generated_tokens)
+        )
         self.__generated_arguments.append(FunctionParameter(arg_name, generated_tokens))
+        token: str
+        while True:
+            possible_tokens: list[int] = (
+                self.__function_parameters_predictor.next_string_possibe_tokens_ids(
+                    generated_tokens
+                )
+            )
+            logits: list[float] = self.__model.get_masked_logits(
+                self.__text_ids, possible_tokens
+            )
+            high_score_id = int(torch.argmax(torch.tensor(logits)))
+            token = self.__model.decode(tensor.torch(high_score_id))
+            if 
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
         dynamic_prompt: str = (

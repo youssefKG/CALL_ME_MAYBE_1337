@@ -1,6 +1,16 @@
+from tokenize import String
+
 from src.cache.cache import Cache
 from src.constraints.regex_constraint import RegexConstraint
 from enum import Enum
+
+
+class StringState(str, Enum):
+    START = ""
+    OPEN_CONTENT = '"'
+    ESCAPE = '"\\nrtbf.*?$[]()+{}i^'
+    CONTENT = "any charactere"
+    CLOSED_CONTENT = ","
 
 
 class NumberState(str, Enum):
@@ -39,7 +49,9 @@ class FunctionParametersPredictor:
 
     def next_state_for_number(self, num: str) -> NumberState:
         current_state: NumberState = NumberState.START
-        for idx, ch in enumerate(num):
+        fraction_counter: int = 0
+        interger_counter: int = 0
+        for ch in num:
             match current_state:
                 case NumberState.START:
                     if ch in "-+":
@@ -51,13 +63,42 @@ class FunctionParametersPredictor:
                 case NumberState.INTEGER:
                     if ch == ".":
                         current_state = NumberState.FRACTION
-                    elif idx == 10:
+                    elif interger_counter == 10:
                         current_state = NumberState.FINAL
+                    else:
+                        interger_counter += 1
                 case NumberState.FRACTION:
                     if ch == "," or ch not in NumberState.SIGN.value:
                         current_state = NumberState.FINAL
-                    elif idx > 4:
+                    elif fraction_counter == 6:
                         current_state = NumberState.FINAL
+                    else:
+                        fraction_counter += 1
                 case NumberState.FINAL:
                     ...
+        return current_state
+
+    def next_string_possible_tokens_ids(self, string: str) -> list[int]:
+        tokens_ids: list[int] = list()
+        next_state: StringState = self.next_string_state(string)
+
+        return tokens_ids
+
+    def next_string_state(self, string: str) -> StringState:
+        current_state: StringState = StringState.START
+        for ch in string:
+            match current_state:
+                case StringState.START:
+                    current_state = StringState.OPEN_CONTENT
+                case StringState.OPEN_CONTENT:
+                    current_state = StringState.CONTENT
+                case StringState.CONTENT:
+                    if ch == '"':
+                        current_state = StringState.CLOSED_CONTENT
+                    elif ch == "\\":
+                        current_state = StringState.ESCAPE
+                case StringState.ESCAPE:
+                    current_state = StringState.CONTENT
+                case StringState.CLOSED_CONTENT:
+                    pass
         return current_state

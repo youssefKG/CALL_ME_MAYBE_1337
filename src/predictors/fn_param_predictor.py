@@ -1,7 +1,4 @@
-from tokenize import String
-
 from src.cache.cache import Cache
-from src.constraints.regex_constraint import RegexConstraint
 from enum import Enum
 
 
@@ -81,6 +78,9 @@ class FunctionParametersPredictor:
     def next_string_possible_tokens_ids(self, string: str) -> list[int]:
         tokens_ids: list[int] = list()
         next_state: StringState = self.next_string_state(string)
+
+        for ch in next_state.value:
+            pass
 
         return tokens_ids
 

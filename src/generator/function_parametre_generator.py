@@ -97,7 +97,7 @@ class FunctionArgumentsGenerator:
         token: str
         while True:
             possible_tokens: list[int] = (
-                self.__function_parameters_predictor.next_string_possibe_tokens_ids(
+                self.__function_parameters_predictor.next_string_possible_tokens_ids(
                     generated_tokens
                 )
             )
@@ -106,7 +106,7 @@ class FunctionArgumentsGenerator:
             )
             high_score_id = int(torch.argmax(torch.tensor(logits)))
             token = self.__model.decode(tensor.torch(high_score_id))
-            if 
+            generated_tokens += token
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
         dynamic_prompt: str = (

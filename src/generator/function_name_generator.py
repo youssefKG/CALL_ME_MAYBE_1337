@@ -9,17 +9,17 @@ class FunctionNameGenerator:
     def __init__(
         self,
         model: Model,
-        fn_predicor: FunctionNamePredictor,
+        function_name_predictor: FunctionNamePredictor,
         prompt_generator: PromptGenerator,
         prompt: str,
     ) -> None:
         self.__model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
-        self.__function_name_predictor: FunctionNamePredictor = fn_predicor
+        self.__function_name_predictor: FunctionNamePredictor = function_name_predictor
         self.__cache: Cache = Cache()
         self.__text_ids: list[int] = list()
         self.__generated_ids: list[int] = list()
-        self.__fn_name_list: list[str] = list()
+        self.__function_name_tokens: list[str] = list()
         self.__prompt: str = prompt
         self.__fn_name: str = ""
         self.__init_text_ids()
@@ -29,29 +29,29 @@ class FunctionNameGenerator:
             self.__predict_next_token()
             if self.__function_name_predictor.is_completed(self.__generated_ids):
                 break
-            predicted_ids: list[int] = (
+            possible_tokens_ids: list[int] = (
                 self.__function_name_predictor.get_next_predictions_ids(
                     self.__generated_ids
                 )
             )
             logits: list[float] = self.__model.get_masked_logits(
-                self.__text_ids, predicted_ids
+                self.__text_ids, possible_tokens_ids
             )
             high_score = torch.argmax(torch.tensor(logits))
             self.__add_next_token_id(int(high_score))
-        self.__fn_name = "".join(self.__fn_name_list)
+        self.__fn_name = "".join(self.__function_name_tokens)
 
     def __add_next_token_id(self, id: int) -> None:
         self.__generated_ids.append(id)
         self.__text_ids.append(id)
         token: str = self.__model.decode(torch.tensor(id))
-        self.__fn_name_list.append(token)
+        self.__function_name_tokens.append(token)
 
     def __init_text_ids(self) -> None:
         self.__text_ids = (
             self.__cache.function_name_static_prompt_ids
             + self.__model.encode_text(
-                self.__prompt_generator.get_fns_def_dynamic_prompt(self.__prompt)
+                self.__prompt_generator.function_name_dynamic_prompt(self.__prompt)
             )
         )
 

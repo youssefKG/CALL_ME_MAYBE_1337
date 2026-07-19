@@ -26,7 +26,7 @@ class FunctionArgumentsGenerator:
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__text_ids: list[int] = list()
         self.__model: Model = model
-        self.__generated_arguments: list[FunctionParameter] = list()
+        self.__function_arguments: list[FunctionParameter] = list()
         self.__user_prompt: str = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
         self.__cache: Cache = Cache()
@@ -82,7 +82,7 @@ class FunctionArgumentsGenerator:
             generated_ids.append(int(high_score_id))
             self.__text_ids.append(int(high_score_id))
         generated_arg_value: str = str(float(generated_number))
-        self.__generated_arguments.append(
+        self.__function_arguments.append(
             FunctionParameter(arg_name, generated_arg_value)
         )
         return generated_arg_value
@@ -92,7 +92,7 @@ class FunctionArgumentsGenerator:
         string_state: StringState = (
             self.__function_parameters_predictor.next_string_state(generated_tokens)
         )
-        self.__generated_arguments.append(FunctionParameter(arg_name, generated_tokens))
+        self.__function_arguments.append(FunctionParameter(arg_name, generated_tokens))
         token: str
         while True:
             possible_tokens: list[int] = (
@@ -104,18 +104,16 @@ class FunctionArgumentsGenerator:
                 self.__text_ids, possible_tokens
             )
             high_score_id = int(torch.argmax(torch.tensor(logits)))
-            token = self.__model.decode(tensor.torch(high_score_id))
+            token = self.__model.decode(torch.tensor(high_score_id))
             generated_tokens += token
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
-        dynamic_prompt: str = (
-            self.__prompt_generator.get_function_arguments_dynamic_prompt(
-                self.__function_definition,
-                self.__user_prompt,
-                self.__generated_arguments,
-                arg_name,
-                arg_type,
-            )
+        dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(
+            self.__function_definition,
+            self.__user_prompt,
+            self.__function_arguments,
+            arg_name,
+            arg_type,
         )
         dynamic_prompt_ids: list[int] = self.__model.encode_text(dynamic_prompt)
         self.__text_ids += dynamic_prompt_ids
@@ -137,3 +135,7 @@ class FunctionArgumentsGenerator:
         for token_id in self.__text_ids:
             token = self.__model.decode(torch.tensor(token_id))
             print(token, end="", flush=True)
+
+    @property
+    def function_arguments(self) -> list[FunctionParameter]:
+        return self.__function_arguments

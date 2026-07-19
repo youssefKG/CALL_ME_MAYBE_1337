@@ -39,7 +39,7 @@ class Parser:
         self.__prompts = prompts_validator.root
 
     @property
-    def get_prompts(self) -> list[PromptModel]:
+    def prompts(self) -> list[PromptModel]:
         return self.__prompts
 
     @property

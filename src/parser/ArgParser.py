@@ -111,4 +111,5 @@ class ArgsParser:
     def __raise_duplicated_option(self, option: str) -> None:
         raise ArgsError(f"raise duplicated option {option}")
 
-    # ------------------------------ End Errors ---------------------------
+
+# ------------------------------ End Errors ---------------------------

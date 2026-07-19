@@ -21,7 +21,6 @@ class NumberState(str, Enum):
 class FunctionParametersPredictor:
     def __init__(self) -> None:
         self.__cache: Cache = Cache()
-        self.__string_pattern: str = r"^[\x00-\x7F]*$"
 
     def next_possible_tokens_ids(self, content: str, arg_type: str) -> list[int]:
         tokens_ids: list[int] = list()

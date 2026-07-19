@@ -4,17 +4,21 @@ import src.constants.constants as constants
 
 
 class Cache:
-    __instance: Self | None
+    __instance: Self | None = None
 
     class Builder:
-        def __init__(self, model: Model) -> None:
-            self.__model: Model = model
+        def __init__(self) -> None:
+            self.__model: Model
             self.__tokens_ids: dict[str, int] = dict()
             self.__function_name_static_prompt_ids: list[int]
             self.__function_arguments_static_prompt_ids: list[int]
 
         def build(self) -> "Cache":
             return Cache(self)
+
+        def set_model(self, model: Model) -> Self:
+            self.__model = model
+            return self
 
         def set_tokens_ids(self) -> Self:
             def __encode_list(lst: list[str]) -> None:

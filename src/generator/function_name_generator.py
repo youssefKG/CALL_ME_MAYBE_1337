@@ -9,7 +9,6 @@ class FunctionNameGenerator:
     def __init__(
         self,
         model: Model,
-        cache: Cache,
         fn_predicor: FunctionNamePredictor,
         prompt_generator: PromptGenerator,
         prompt: str,
@@ -17,7 +16,7 @@ class FunctionNameGenerator:
         self.__model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__function_name_predictor: FunctionNamePredictor = fn_predicor
-        self.__cache: Cache = cache
+        self.__cache: Cache = Cache()
         self.__text_ids: list[int] = list()
         self.__generated_ids: list[int] = list()
         self.__fn_name_list: list[str] = list()
@@ -50,7 +49,7 @@ class FunctionNameGenerator:
 
     def __init_text_ids(self) -> None:
         self.__text_ids = (
-            self.__cache.get_function_name_static_prompt_ids
+            self.__cache.function_name_static_prompt_ids
             + self.__model.encode_text(
                 self.__prompt_generator.get_fns_def_dynamic_prompt(self.__prompt)
             )

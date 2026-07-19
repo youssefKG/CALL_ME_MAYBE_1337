@@ -1,16 +1,41 @@
-NUMBERS: list[str] = [
+ESCAPE_SEQUENCES: list[str] = [
+    "\\",
+    "'",
+    '"',
+    "a",
+    "b",
+    "f",
+    "n",
+    "r",
+    "t",
+    "v",
     "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
+    "x",
+    "u",
+    "U",
+    "N",
     ".",
-    "-",
+    "^",
+    "$",
+    "*",
+    "+",
+    "?",
+    "{",
+    "}",
+    "[",
+    "]",
+    "(",
+    ")",
+    "|",
 ]
 
-ASCII: list[str] = [chr(idx) for idx in range(128)]
+CHAT_TEMPLATES = ["<|im_end|>", "<|im-start|>", "<think>", "</think>"]
+
+NUMBERS = [
+    "-",  # negative sign
+    "+",  # only valid in exponent
+    ".",  # decimal point
+    "e",  # exponent
+    "E",  # exponent
+    *list("0123456789"),
+]

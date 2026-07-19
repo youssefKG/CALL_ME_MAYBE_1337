@@ -20,7 +20,6 @@ class FunctionArgumentsGenerator:
         user_prompt: str,
         function_definition: FunctionDefinitionModel,
         model: Model,
-        cache: Cache,
         function_parameters_predictor: FunctionParametersPredictor,
     ) -> None:
 
@@ -30,7 +29,7 @@ class FunctionArgumentsGenerator:
         self.__generated_arguments: list[FunctionParameter] = list()
         self.__user_prompt: str = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
-        self.__cache: Cache = cache
+        self.__cache: Cache = Cache()
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             function_parameters_predictor
         )
@@ -122,7 +121,7 @@ class FunctionArgumentsGenerator:
         self.__text_ids += dynamic_prompt_ids
 
     def __set_static_prompt_ids(self) -> None:
-        self.__text_ids = self.__cache.get_function_argument_static_prompt_ids.copy()
+        self.__text_ids = self.__cache.function_arguments_static_prompt_ids
 
     def __prepare_next_argument(self, arg_name: str, arg_type: str) -> None:
         self.__set_static_prompt_ids()

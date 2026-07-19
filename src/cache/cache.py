@@ -1,67 +1,76 @@
-from src.utils.singleton import Singleton
+from typing_extensions import Self
+from src.LlmModel.model import Model
+import src.constants.constants as constants
 
 
-class Cache(Singleton):
-    def __init__(self) -> None:
-        self.__fn_names_ids: list[int] = list()
-        self.__function_argument_static_prompt_ids: list[int]
-        self.__im_end_id: int
-        self.__numbers_ids: list[int] = list()
-        self.__ascii_ids: list[int] = list()
-        self.__null_ids: list[int] = list()
-        self.__number_tokens_ids: dict[str, int] = dict()
-        self.__escape_tokens: dict[str, int] = dict()
+class Cache:
+    __instance: Self | None
+
+    class Builder:
+        def __init__(self, model: Model) -> None:
+            self.__model: Model = model
+            self.__tokens_ids: dict[str, int] = dict()
+            self.__function_name_static_prompt_ids: list[int]
+            self.__function_arguments_static_prompt_ids: list[int]
+
+        def build(self) -> "Cache":
+            return Cache(self)
+
+        def set_tokens_ids(self) -> Self:
+            def __encode_list(lst: list[str]) -> None:
+                for ch in lst:
+                    ch_id: int = self.__model.encode_text(ch)[0]
+                    self.__tokens_ids[ch] = ch_id
+
+            __encode_list(constants.ESCAPE_SEQUENCES)
+            __encode_list(constants.NUMBERS)
+            __encode_list(constants.CHAT_TEMPLATES)
+            return self
+
+        def set_function_name_static_prompt(self, prompt: str) -> Self:
+            self.__function_name_static_prompt_ids = self.__model.encode_text(prompt)
+            return self
+
+        def set_function_argument_static_prompt(self, prompt: str) -> Self:
+            self.__function_arguments_static_prompt_ids = self.__model.encode_text(
+                prompt
+            )
+            return self
+
+        @property
+        def function_arguments_static_prompt_ids(self) -> list[int]:
+            return self.__function_arguments_static_prompt_ids.copy()
+
+        @property
+        def function_name_static_prompt_ids(self) -> list[int]:
+            return self.__function_name_static_prompt_ids.copy()
+
+        @property
+        def tokens_ids(self) -> dict[str, int]:
+            return self.__tokens_ids.copy()
+
+    def __new__(cls, builder: Builder | None = None) -> Self:
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
+
+    def __init__(self, builder: Builder | None = None) -> None:
+        if builder:
+            self.__function_name_static_prompt_ids: list[int] = (
+                builder.function_name_static_prompt_ids
+            )
+            self.__function_arguments_static_prompt_ids: list[int] = (
+                builder.function_arguments_static_prompt_ids
+            )
+            self.__tokens_ids = builder.tokens_ids
 
     @property
-    def get_function_name_static_prompt_ids(self) -> list[int]:
-        return self.__fn_names_ids
-
-    def set_fns_def_static_prompt_ids(self, ids: list[int]) -> None:
-        self.__fn_names_ids = ids
+    def function_name_static_prompt_ids(self) -> list[int]:
+        return self.__function_name_static_prompt_ids.copy()
 
     @property
-    def get_function_argument_static_prompt_ids(self) -> list[int]:
-        return self.__function_argument_static_prompt_ids
-
-    def set_function_argument_static_prompt_ids(self, ids: list[int]) -> None:
-        self.__function_argument_static_prompt_ids = ids
-
-    def set_im_end_id(self, id: int) -> None:
-        self.__im_end_id = id
-
-    @property
-    def im_end_id(self) -> int:
-        return self.__im_end_id
-
-    def set_numbers_ids(self, ids: list[int]) -> None:
-        self.__numbers_ids += ids
-
-    @property
-    def get_numbers_ids(self) -> list[int]:
-        return self.__numbers_ids
-
-    def set_ascii_ids(self, ids: list[int]) -> None:
-        self.__ascii_ids = ids
-
-    @property
-    def get_ascii_ids(self) -> list[int]:
-        return self.__ascii_ids
-
-    def set_null_id(self, ids: list[int]) -> None:
-        self.__null_ids = ids
-
-    @property
-    def get_null_ids(self) -> list[int]:
-        return self.__null_ids
-
-    def add_token(self, token: str, token_id: int) -> None:
-        self.__number_tokens_ids[token] = token_id
+    def function_arguments_static_prompt_ids(self) -> list[int]:
+        return self.__function_arguments_static_prompt_ids.copy()
 
     def get_token_id(self, token: str) -> int:
-        return self.__number_tokens_ids[token]
-
-    def set_escape_token(self, token: str, token_id: int) -> None:
-        self.__escape_tokens[token] = token_id
-
-    def get_escape_token_id(self, token: str) -> int:
-        return self.__escape_tokens[token]
+        return self.__tokens_ids[token]

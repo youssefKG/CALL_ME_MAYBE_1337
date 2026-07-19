@@ -45,6 +45,3 @@ class Model(Small_LLM_Model):
 
     def get_vocab(self) -> None:
         print(self.get_path_to_vocab_file())
-
-    def __soft_max(self) -> None:
-        pass

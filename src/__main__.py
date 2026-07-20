@@ -23,18 +23,17 @@ def main() -> None:
         Cache.Builder()
         .set_model(model)
         .set_function_name_static_prompt(prompt_generator.function_name_static_prompt)
+        .set_tokens_ids()
         .set_function_argument_static_prompt(
             prompt_generator.function_argument_static_prompt
         )
         .build()
     )
-
     output_generator: OutputGenerator = OutputGenerator(
         parser.functions_definition,
         model,
         prompt_generator,
     )
-
     output_generator.generate()
 
 

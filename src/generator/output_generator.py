@@ -28,19 +28,17 @@ class OutputGenerator:
         self.__init_functions_name_predictor()
 
     def generate(self) -> None:
-        for prompt in self.__prompt_generator.iter_prompts:
+        for prompt in self.__prompt_generator.iter_prompts():
             function_definition: FunctionDefinitionModel | None = (
                 self.__function_definition(prompt)
             )
             if function_definition:
-                function_call: FunctionCall = FunctionCall()
-                if function_definition:
-                    self.__function_calls.append(function_call)
-                    function_call.name = function_definition.name
-                    function_call.prompt = prompt
-                    function_call.arguments = self.__function_arguments(
-                        function_definition, prompt
-                    )
+                function_call: FunctionCall = FunctionCall(
+                    function_definition.name,
+                    prompt,
+                    self.__function_arguments(function_definition, prompt),
+                )
+                self.__function_calls.append(function_call)
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
         def __get_function_definition(

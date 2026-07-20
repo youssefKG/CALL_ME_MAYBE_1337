@@ -53,7 +53,6 @@ class FunctionArgumentsGenerator:
             argument = next(arg_generator)
 
     def __generate_param_number(self, arg_name: str) -> str:
-        generated_ids: list[int] = list()
         generated_number: str = str()
         next_state_for_number: NumberState = (
             self.__function_parameters_predictor.next_state_for_number(generated_number)
@@ -64,11 +63,7 @@ class FunctionArgumentsGenerator:
                     generated_number, "number"
                 )
             )
-            logits: list[float] = self.__model.get_masked_logits(
-                self.__text_ids, possible_tokens
-            )
-            high_score_id = int(torch.argmax(torch.tensor(logits)))
-            token: str = self.__model.decode(torch.tensor(high_score_id))
+            token, token_id = self.__get_next_token(possible_tokens)
             print(token, end="", flush=True)
             generated_number += token
             next_state_for_number = (
@@ -79,8 +74,7 @@ class FunctionArgumentsGenerator:
             if next_state_for_number == NumberState.FINAL:
                 generated_number = generated_number[:-1]
                 break
-            generated_ids.append(int(high_score_id))
-            self.__text_ids.append(int(high_score_id))
+            self.__text_ids.append(int(token_id))
         generated_arg_value: str = str(float(generated_number))
         self.__function_arguments.append(
             FunctionParameter(arg_name, generated_arg_value)
@@ -88,24 +82,39 @@ class FunctionArgumentsGenerator:
         return generated_arg_value
 
     def __generate_string(self, arg_name: str) -> None:
-        generated_tokens: str = '"'
+        generated_string: str = '"'
         string_state: StringState = (
-            self.__function_parameters_predictor.next_string_state(generated_tokens)
+            self.__function_parameters_predictor.next_string_state(generated_string)
         )
-        self.__function_arguments.append(FunctionParameter(arg_name, generated_tokens))
-        token: str
+        self.__function_arguments.append(FunctionParameter(arg_name, generated_string))
+        possible_tokens: list[int]
         while True:
-            possible_tokens: list[int] = (
+            # print(string_state)
+            possible_tokens = (
                 self.__function_parameters_predictor.next_string_possible_tokens_ids(
-                    generated_tokens
+                    generated_string
                 )
             )
-            logits: list[float] = self.__model.get_masked_logits(
-                self.__text_ids, possible_tokens
+            token, token_id = self.__get_next_token(possible_tokens)
+            generated_string += token
+            string_state = self.__function_parameters_predictor.next_string_state(
+                generated_string
             )
-            high_score_id = int(torch.argmax(torch.tensor(logits)))
-            token = self.__model.decode(torch.tensor(high_score_id))
-            generated_tokens += token
+            print(token, end="", flush=True)
+            if string_state == StringState.FINAL:
+                break
+            self.__text_ids.append(token_id)
+
+    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, int]:
+        masked_logits: list[float] = self.__model.get_masked_logits(
+            self.__text_ids, high_score_tokens
+        )
+        token_id: int = int(torch.argmax(torch.tensor(masked_logits)))
+        token: str = self.__model.decode(torch.tensor(token_id))
+        if "\\" in token:
+            token = token[: token.index("\\") + 1]
+            token_id = int(self.__model.encode(torch.tensor(token))[0])
+        return (token, token_id)
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
         dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(
@@ -131,7 +140,7 @@ class FunctionArgumentsGenerator:
         yield None
 
     def __log_text_ids(self) -> None:
-        print("-" * 40)
+        print("\n" + "*" * 10)
         for token_id in self.__text_ids:
             token = self.__model.decode(torch.tensor(token_id))
             print(token, end="", flush=True)

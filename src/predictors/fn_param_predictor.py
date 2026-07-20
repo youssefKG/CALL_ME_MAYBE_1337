@@ -3,11 +3,10 @@ from enum import Enum
 
 
 class StringState(str, Enum):
-    START = ""
-    OPEN_CONTENT = '"'
+    START = '"'
     ESCAPE = '"\\nrtbf.*?$[]()+{}i^'
-    CONTENT = "any charactere"
-    CLOSED_CONTENT = ","
+    CONTENT = "any"
+    FINAL = ","
 
 
 class NumberState(str, Enum):
@@ -23,16 +22,10 @@ class FunctionParametersPredictor:
         self.__cache: Cache = Cache()
 
     def next_possible_tokens_ids(self, content: str, arg_type: str) -> list[int]:
-        tokens_ids: list[int] = list()
-        match arg_type:
-            case "number":
-                return self.next_possible_tokens(content)
-            case "string":
-                return []
-            case "bool":
-                pass
-            case _:
-                pass
+        if arg_type == "number":
+            return self.next_possible_tokens(content)
+        elif arg_type == "string":
+            return []
         return tokens_ids
 
     def next_possible_tokens(self, num: str) -> list[int]:
@@ -75,29 +68,34 @@ class FunctionParametersPredictor:
         return current_state
 
     def next_string_possible_tokens_ids(self, string: str) -> list[int]:
-        tokens_ids: list[int] = list()
-        next_state: StringState = self.next_string_state(string)
+        current_state: StringState = self.next_string_state(string)
 
-        for ch in next_state.value:
-            pass
-
-        return tokens_ids
+        match current_state:
+            case StringState.START:
+                return list()
+            case StringState.ESCAPE:
+                return [
+                    self.__cache.get_token_id(token)
+                    for token in StringState.ESCAPE.value
+                ]
+            case StringState.FINAL:
+                return [self.__cache.get_token_id(",")]
+            case StringState.CONTENT:
+                return list()
 
     def next_string_state(self, string: str) -> StringState:
         current_state: StringState = StringState.START
         for ch in string:
             match current_state:
                 case StringState.START:
-                    current_state = StringState.OPEN_CONTENT
-                case StringState.OPEN_CONTENT:
                     current_state = StringState.CONTENT
                 case StringState.CONTENT:
                     if ch == '"':
-                        current_state = StringState.CLOSED_CONTENT
+                        current_state = StringState.FINAL
                     elif ch == "\\":
                         current_state = StringState.ESCAPE
                 case StringState.ESCAPE:
                     current_state = StringState.CONTENT
-                case StringState.CLOSED_CONTENT:
-                    pass
+                case StringState.FINAL:
+                    ...
         return current_state

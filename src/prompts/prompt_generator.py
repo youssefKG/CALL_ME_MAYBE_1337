@@ -155,7 +155,6 @@ class PromptGenerator:
             builder.function_argument_static_prompt
         )
 
-    @property
     def iter_prompts(self) -> Generator[str]:
         for prompt in self.prompts:
             yield prompt.prompt

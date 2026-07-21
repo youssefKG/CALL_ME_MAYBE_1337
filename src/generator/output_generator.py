@@ -2,7 +2,7 @@ from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.predictors.fn_name_predictor import FunctionNamePredictor
 from src.LlmModel.model import Model
 from src.prompts.prompt_generator import PromptGenerator
-from src.utils.function import FunctionCall, FunctionParameter
+from src.models.functions_call import FunctionCall, Argument
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.generator.function_name_generator import FunctionNameGenerator
 from src.generator.function_parametre_generator import FunctionArgumentsGenerator
@@ -34,9 +34,9 @@ class OutputGenerator:
             )
             if function_definition:
                 function_call: FunctionCall = FunctionCall(
-                    function_definition.name,
-                    prompt,
-                    self.__function_arguments(function_definition, prompt),
+                    name=function_definition.name,
+                    prompt=prompt,
+                    parameters=self.__function_arguments(function_definition, prompt),
                 )
                 self.__functions_calls.append(function_call)
 
@@ -60,7 +60,7 @@ class OutputGenerator:
 
     def __function_arguments(
         self, function_definition: FunctionDefinitionModel, prompt: str
-    ) -> list[FunctionParameter]:
+    ) -> Argument:
         function_argument_generator = FunctionArgumentsGenerator(
             prompt_generator=self.__prompt_generator,
             user_prompt=prompt,

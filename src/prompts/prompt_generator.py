@@ -1,5 +1,3 @@
-from src.utils.function import FunctionParameter
-
 from enum import Enum
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
@@ -168,7 +166,7 @@ class PromptGenerator:
         self,
         function_definition: FunctionDefinitionModel,
         user_prompt: str,
-        generated_arguments: list[FunctionParameter],
+        generated_arguments: list[dict[str, bool | float | str]],
         arg_name: str,
         arg_type: str,
     ) -> str:
@@ -185,12 +183,16 @@ class PromptGenerator:
             return res
 
         def __format_generated_argument(
-            generated_argument: list[FunctionParameter], arg_name: str, arg_type: str
+            generated_argument: list[dict[str, bool | float | str]],
+            arg_name: str,
+            arg_type: str,
         ) -> str:
             res: str = str()
             for arg in generated_argument:
-                res += '    {"name": "{NAME}", "value": {VALUE}}, \n'.replace(
-                    "{NAME}", arg.name
+                res += (
+                    '    {"name": "{NAME}", "value": {VALUE}}, \n'.replace(
+                        "{NAME}", arg["name"]
+                    ),
                 )
                 if arg_type == "string":
                     res = res.replace("{VALUE}", f'"{arg.value}"')
@@ -198,7 +200,7 @@ class PromptGenerator:
                     res = res.replace("{VALUE}", arg.value)
 
             res += '    {"name": "{ARG_NAME}", "value": '.replace(
-                "{ARG_NAME}", arg_name
+                "{ARG_NAME}", arg_name["name"]
             )
             if arg_type == "string":
                 res += '"'

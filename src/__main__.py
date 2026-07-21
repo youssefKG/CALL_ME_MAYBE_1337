@@ -40,7 +40,7 @@ def main() -> None:
         print("*" * 10)
         print(function_call.name)
         print(function_call.prompt)
-        for argument in function_call.arguments:
+        for argument in function_call.arguments.items():
             print(argument.name, " = ", argument.value)
         print("*" * 10)
 

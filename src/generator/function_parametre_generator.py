@@ -9,7 +9,6 @@ from src.cache.cache import Cache
 from collections.abc import Generator
 from src.prompts.prompt_generator import PromptGenerator
 import torch
-from src.utils.function import FunctionParameter
 from typing import cast, Literal
 
 
@@ -23,11 +22,10 @@ class FunctionArgumentsGenerator:
         model: Model,
         function_parameters_predictor: FunctionParametersPredictor,
     ) -> None:
-
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__text_ids: list[int] = list()
         self.__model: Model = model
-        self.__function_arguments: list[FunctionParameter] = list()
+        self.__function_arguments: list[dict[str, float | str | float]] = list()
         self.__user_prompt: str = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
         self.__cache: Cache = Cache()
@@ -69,7 +67,7 @@ class FunctionArgumentsGenerator:
             self.__text_ids += tokens_id
         generated_arg_value: str = str(float(self.__generated_tokens))
         self.__function_arguments.append(
-            FunctionParameter(arg_name, generated_arg_value)
+            {"name": arg_name, "value": self.__generated_tokens}
         )
         return generated_arg_value
 
@@ -95,7 +93,7 @@ class FunctionArgumentsGenerator:
                 break
             self.__text_ids += tokens_ids
         self.__function_arguments.append(
-            FunctionParameter(arg_name, self.__generated_tokens)
+            {"name": arg_name, "value": self.__generated_tokens}
         )
 
     def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, list[int]]:
@@ -136,5 +134,5 @@ class FunctionArgumentsGenerator:
             yield (arg_name, arg.type)
 
     @property
-    def function_arguments(self) -> list[FunctionParameter]:
+    def function_arguments(self) -> list[dict[str, float | bool | str]]:
         return self.__function_arguments

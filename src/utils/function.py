@@ -1,7 +1,7 @@
 class FunctionParameter:
-    def __init__(self, name: str, value: str) -> None:
+    def __init__(self, name: str, value: str | float) -> None:
         self.name: str = name
-        self.value: str = value
+        self.value: str | float = value
 
 
 class FunctionCall:

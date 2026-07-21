@@ -10,6 +10,7 @@ from collections.abc import Generator
 from src.prompts.prompt_generator import PromptGenerator
 import torch
 from src.utils.function import FunctionParameter
+from typing import cast, Literal
 
 
 class FunctionArgumentsGenerator:
@@ -33,88 +34,82 @@ class FunctionArgumentsGenerator:
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             function_parameters_predictor
         )
+        self.__generated_tokens: str = str()
 
     def generate(self) -> None:
-        arg_generator: Generator[tuple[str, str] | None] = (
-            self.__next_argument_generator()
-        )
-        argument: tuple[str, str] | None = next(arg_generator)
-        while argument:
-            arg_name, arg_type = argument
+        for arg_name, arg_type in self.__arg_iter():
+            self.__generated_tokens = str()
             self.__prepare_next_argument(arg_name, arg_type)
-            self.__log_text_ids()
             match arg_type:
                 case "number":
                     self.__generate_param_number(arg_name)
                 case "string":
                     self.__generate_string(arg_name)
-                case _:
-                    pass
-            argument = next(arg_generator)
 
     def __generate_param_number(self, arg_name: str) -> str:
-        generated_number: str = str()
-        next_state_for_number: NumberState = (
-            self.__function_parameters_predictor.next_state_for_number(generated_number)
-        )
+        next_state_for_number: NumberState
         while True:
             possible_tokens: list[int] = (
-                self.__function_parameters_predictor.next_possible_tokens_ids(
-                    generated_number, "number"
+                self.__function_parameters_predictor.next_tokens_ids(
+                    self.__generated_tokens, "number"
                 )
             )
-            token, token_id = self.__get_next_token(possible_tokens)
+            token, tokens_id = self.__get_next_token(possible_tokens)
+            self.__generated_tokens += token
+            next_state_for_number = cast(
+                NumberState,
+                self.__function_parameters_predictor.next_state(
+                    self.__generated_tokens, "number"
+                ),
+            )
             print(token, end="", flush=True)
-            generated_number += token
-            next_state_for_number = (
-                self.__function_parameters_predictor.next_state_for_number(
-                    generated_number
-                )
-            )
             if next_state_for_number == NumberState.FINAL:
-                generated_number = generated_number[:-1]
+                self.__generated_tokens = self.__generated_tokens[:-1]
                 break
-            self.__text_ids.append(int(token_id))
-        generated_arg_value: str = str(float(generated_number))
+            self.__text_ids += tokens_id
+        generated_arg_value: str = str(float(self.__generated_tokens))
         self.__function_arguments.append(
             FunctionParameter(arg_name, generated_arg_value)
         )
         return generated_arg_value
 
     def __generate_string(self, arg_name: str) -> None:
-        generated_string: str = '"'
-        string_state: StringState = (
-            self.__function_parameters_predictor.next_string_state(generated_string)
-        )
-        self.__function_arguments.append(FunctionParameter(arg_name, generated_string))
         possible_tokens: list[int]
+        string_state: StringState
         while True:
-            # print(string_state)
-            possible_tokens = (
-                self.__function_parameters_predictor.next_string_possible_tokens_ids(
-                    generated_string
-                )
+            possible_tokens = self.__function_parameters_predictor.next_tokens_ids(
+                self.__generated_tokens, "string"
             )
-            token, token_id = self.__get_next_token(possible_tokens)
-            generated_string += token
-            string_state = self.__function_parameters_predictor.next_string_state(
-                generated_string
+            token, tokens_ids = self.__get_next_token(possible_tokens)
+            self.__generated_tokens += token
+            string_state = cast(
+                StringState,
+                self.__function_parameters_predictor.next_state(
+                    self.__generated_tokens, "string"
+                ),
             )
             print(token, end="", flush=True)
             if string_state == StringState.FINAL:
+                double_quotes_ids: int = self.__generated_tokens.rindex('"')
+                self.__generated_tokens = self.__generated_tokens[:double_quotes_ids]
                 break
-            self.__text_ids.append(token_id)
+            self.__text_ids += tokens_ids
+        self.__function_arguments.append(
+            FunctionParameter(arg_name, self.__generated_tokens)
+        )
 
-    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, int]:
+    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, list[int]]:
         masked_logits: list[float] = self.__model.get_masked_logits(
             self.__text_ids, high_score_tokens
         )
-        token_id: int = int(torch.argmax(torch.tensor(masked_logits)))
-        token: str = self.__model.decode(torch.tensor(token_id))
+        tokens_id: list[int] = cast(
+            list[int], [torch.argmax(torch.tensor(masked_logits))]
+        )
+        token: str = self.__model.decode(torch.tensor(tokens_id[0]))
         if "\\" in token:
             token = token[: token.index("\\") + 1]
-            token_id = int(self.__model.encode(torch.tensor(token))[0])
-        return (token, token_id)
+            tokens_id = self.__model.encode_text(token)
+        return (token, tokens_id)
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
         dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(
@@ -134,16 +129,11 @@ class FunctionArgumentsGenerator:
         self.__set_static_prompt_ids()
         self.__set_dynamic_prompt(arg_name, arg_type)
 
-    def __next_argument_generator(self) -> Generator[tuple[str, str] | None]:
+    def __arg_iter(
+        self,
+    ) -> Generator[tuple[str, Literal["string", "number"]]]:
         for arg_name, arg in self.__function_definition.parameters.items():
             yield (arg_name, arg.type)
-        yield None
-
-    def __log_text_ids(self) -> None:
-        print("\n" + "*" * 10)
-        for token_id in self.__text_ids:
-            token = self.__model.decode(torch.tensor(token_id))
-            print(token, end="", flush=True)
 
     @property
     def function_arguments(self) -> list[FunctionParameter]:

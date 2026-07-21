@@ -1,0 +1,178 @@
+**********
+fn_substitute_string_with_regex
+Replace all vowels in 'Programming is fun parameters' with "\"
+source_string  =  Programming is fun parameters
+regex  =  [aeiouAEIOU]
+replacement  =  \\n
+**********
+**********
+fn_substitute_string_with_regex
+Replace all vowels in 'Programming is fun parameters' with "\\"
+source_string  =  Programming is fun parameters
+regex  =  [aeiouAEIOU]
+replacement  =  \\n
+**********
+**********
+fn_substitute_string_with_regex
+Replace all vowels in 'Programming is fun parameters' with "\"\"
+source_string  =  Programming is fun parameters
+regex  =  [^aeiouAEIOU]
+replacement  =  \\n
+**********
+**********
+fn_substitute_string_with_regex
+Replace every digit in 'abc123xyz' using regex "\\d+" with "#"
+source_string  =  abc123xyz
+regex  =  \d+
+replacement  =  ##
+**********
+**********
+fn_reverse_string
+Replace every word boundary in 'the cat sat' using regex "\\bcat\\b" with "dog"
+s  =  the cat sat
+**********
+**********
+fn_substitute_string_with_regex
+Replace every tab "\\t" with four spaces
+source_string  =  hello
+regex  =  \t
+replacement  =
+**********
+**********
+fn_substitute_string_with_regex
+Replace every newline "\\n" with a space
+source_string  =  hello
+regex  =  \n
+replacement  =
+**********
+**********
+fn_substitute_string_with_regex
+Replace "C:\\Users\\Admin" with "/home/admin"
+source_string  =  C:\r\*Users\*Admin
+regex  =  C:\r\*Users\*Admin
+replacement  =  C:\r\*home\*Admin
+**********
+**********
+fn_substitute_string_with_regex
+Replace "\\\\server\\share" with "/mnt/share"
+source_string  =  Replace \n\*server\*\nshare with /mnt/share
+regex  =  \n*server\*
+replacement  =  mnt/share
+**********
+**********
+fn_substitute_string_with_regex
+Replace the string "\"Hello\"" with "Hi"
+source_string  =  Hello
+regex  =  .*\n
+replacement  =  Hi
+**********
+**********
+fn_substitute_string_with_regex
+Replace the string "\\\"" with "!"
+source_string  =  hello
+regex  =  .*\n.*
+replacement  =  !
+**********
+**********
+fn_substitute_string_with_regex
+Replace the regex "[aeiouAEIOU]" with "*"
+source_string  =  hello
+regex  =  ([aeiouAEIOU])
+replacement  =   *
+**********
+**********
+fn_substitute_string_with_regex
+Replace the regex "[A-Z]+\\d*" with "TOKEN"
+source_string  =  hello
+regex  =  ([A-Z]+\b\+\b)\b
+replacement  =  TOKEN
+**********
+**********
+fn_substitute_string_with_regex
+Replace the string "\\\\" with "\\"
+source_string  =  string
+regex  =  string
+replacement  =  string
+**********
+**********
+fn_substitute_string_with_regex
+Replace the string "\\" with "\\\\"
+source_string  =  string
+regex  =  string
+replacement  =  string
+**********
+**********
+fn_reverse_string
+Replace the Unicode escape "\\u00E9" with "e"
+s  =  e
+**********
+**********
+fn_add_numbers
+Replace "{\"name\":\"John\"}" with "{}"
+a  =  2.0
+b  =  3.0
+**********
+**********
+fn_substitute_string_with_regex
+Replace every occurrence of "\\" in "C:\\Windows\\System32" with "/"
+source_string  =  C:\r\iWindows\iSystem32
+regex  =  .*\r\i
+replacement  =  /\r\i
+**********
+**********
+fn_substitute_string_with_regex
+Replace every occurrence of "\"" with "'"
+source_string  =  hello
+regex  =  \
+replacement  =  \'}'
+        }
+    }
+# ��� Function Call
+
+The selected function has already been determined.
+
+Your task is to complete the
+**********
+**********
+fn_substitute_string_with_regex
+Replace every occurrence of "\\\\\\" with "X"
+source_string  =  hello
+regex  =  \\n
+replacement  =  X
+**********
+**********
+fn_substitute_string_with_regex
+Replace every occurrence of "\\\\\\\\" with "Y"
+source_string  =  hello
+regex  =  \\n
+replacement  =  Y
+**********
+**********
+fn_substitute_string_with_regex
+Replace "abc\\" with "xyz"
+source_string  =  abc\?
+regex  =  abc\?
+replacement  =  xyz
+**********
+**********
+fn_substitute_string_with_regex
+Replace "\\abc" with "xyz"
+source_string  =  hello
+regex  =  \$$abc$
+replacement  =  xyz
+**********
+**********
+fn_substitute_string_with_regex
+Replace every match of regex "\\w+\\s+\\w+" with "PAIR"
+source_string  =  hello
+regex  =  \s+\b\+\b+\b+\b+
+replacement  =  PAIR
+**********
+**********
+fn_substitute_string_with_regex
+Replace every match of regex "\\d{2,4}" with "NUM"
+source_string  =  hello
+regex  =  \d{2,4}
+replacement  =  NUM
+**********
+

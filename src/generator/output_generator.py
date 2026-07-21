@@ -20,7 +20,7 @@ class OutputGenerator:
         )
         self.__model: Model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
-        self.__function_calls: list[FunctionCall] = list()
+        self.__functions_calls: list[FunctionCall] = list()
         self.__function_name_predictor: FunctionNamePredictor
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             FunctionParametersPredictor()
@@ -38,7 +38,7 @@ class OutputGenerator:
                     prompt,
                     self.__function_arguments(function_definition, prompt),
                 )
-                self.__function_calls.append(function_call)
+                self.__functions_calls.append(function_call)
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
         def __get_function_definition(
@@ -77,3 +77,7 @@ class OutputGenerator:
         for fn_def in self.__functions_definitions:
             fns_def_names_ids.append(self.__model.encode_text(fn_def.name))
         self.__function_name_predictor.set_fns_names_ids_trie(fns_def_names_ids)
+
+    @property
+    def functions_calls(self) -> list[FunctionCall]:
+        return self.__functions_calls

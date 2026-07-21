@@ -36,6 +36,14 @@ def main() -> None:
     )
     output_generator.generate()
 
+    for function_call in output_generator.functions_calls:
+        print("*" * 10)
+        print(function_call.name)
+        print(function_call.prompt)
+        for argument in function_call.arguments:
+            print(argument.name, " = ", argument.value)
+        print("*" * 10)
+
 
 if __name__ == "__main__":
     main()

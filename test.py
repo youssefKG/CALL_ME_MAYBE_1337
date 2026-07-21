@@ -48,5 +48,12 @@ def main() -> None:
     )
 
 
+import ast
+
 if __name__ == "__main__":
-    main()
+    src = """for i in range(1):
+                print("hello")
+    """
+    tree = ast.parse(src)
+    print(dir(tree.body))
+    eval(compile(src, "ast", "exec"))

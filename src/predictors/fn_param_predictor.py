@@ -1,5 +1,6 @@
 from src.cache.cache import Cache
 from enum import Enum
+from typing import Literal
 
 
 class StringState(str, Enum):
@@ -21,22 +22,27 @@ class FunctionParametersPredictor:
     def __init__(self) -> None:
         self.__cache: Cache = Cache()
 
-    def next_possible_tokens_ids(self, content: str, arg_type: str) -> list[int]:
+    def next_tokens_ids(
+        self, content: str, arg_type: Literal["number", "string"]
+    ) -> list[int]:
         if arg_type == "number":
-            return self.next_possible_tokens(content)
+            return self.__next_number_tokens_ids(content)
         elif arg_type == "string":
-            return []
-        return tokens_ids
+            return self.__next_string_tokens_ids(content)
 
-    def next_possible_tokens(self, num: str) -> list[int]:
-        tokens_ids: list[int] = list()
-        next_state: NumberState = self.next_state_for_number(num)
-        for ch in next_state.value:
-            tokens_ids.append(self.__cache.get_token_id(ch))
+    def __next_number_tokens_ids(self, num: str) -> list[int]:
+        next_state: NumberState = self.__number_state(num)
+        return [self.__cache.get_token_id(ch) for ch in next_state.value]
 
-        return tokens_ids
+    def next_state(
+        self, content: str, arg_type: Literal["number", "string"]
+    ) -> NumberState | StringState:
+        if arg_type == "number":
+            return self.__number_state(content)
+        elif arg_type == "string":
+            return self.__string_state(content)
 
-    def next_state_for_number(self, num: str) -> NumberState:
+    def __number_state(self, num: str) -> NumberState:
         current_state: NumberState = NumberState.START
         fraction_counter: int = 0
         interger_counter: int = 0
@@ -67,8 +73,8 @@ class FunctionParametersPredictor:
                     ...
         return current_state
 
-    def next_string_possible_tokens_ids(self, string: str) -> list[int]:
-        current_state: StringState = self.next_string_state(string)
+    def __next_string_tokens_ids(self, content: str) -> list[int]:
+        current_state: StringState = self.__string_state(content)
 
         match current_state:
             case StringState.START:
@@ -83,7 +89,7 @@ class FunctionParametersPredictor:
             case StringState.CONTENT:
                 return list()
 
-    def next_string_state(self, string: str) -> StringState:
+    def __string_state(self, string: str) -> StringState:
         current_state: StringState = StringState.START
         for ch in string:
             match current_state:

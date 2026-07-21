@@ -28,6 +28,7 @@ ESCAPE_SEQUENCES: list[str] = [
     ")",
     "|",
     ",",
+    "i",
 ]
 
 CHAT_TEMPLATES = ["<|im_end|>", "<|im-start|>", "<think>", "</think>"]

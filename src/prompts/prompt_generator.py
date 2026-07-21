@@ -1,4 +1,6 @@
 from enum import Enum
+
+from torch.fx.node import Argument
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self
@@ -77,7 +79,7 @@ class PromptGenerator:
     <think>
 
     <|im_start|>Answer:
-    {"</think>
+    {
         "name": "{FUNCTION_NAME}",
         "prompt": "{USER_PROMPT}",
         "parameters": {
@@ -166,7 +168,7 @@ class PromptGenerator:
         self,
         function_definition: FunctionDefinitionModel,
         user_prompt: str,
-        generated_arguments: list[dict[str, bool | float | str]],
+        generated_arguments: dict[str, bool | float | str],
         arg_name: str,
         arg_type: str,
     ) -> str:
@@ -183,27 +185,19 @@ class PromptGenerator:
             return res
 
         def __format_generated_argument(
-            generated_argument: list[dict[str, bool | float | str]],
+            generated_argument: dict[str, str | float | bool],
             arg_name: str,
             arg_type: str,
         ) -> str:
             res: str = str()
-            for arg in generated_argument:
-                res += (
-                    '    {"name": "{NAME}", "value": {VALUE}}, \n'.replace(
-                        "{NAME}", arg["name"]
-                    ),
+            for name, value in generated_argument.items():
+                res += '"{NAME}": "{VALUE}", '.replace("{NAME}", name).replace(
+                    "{VALUE}" if isinstance(value, str) else '"{VALUE}"', str(value)
                 )
-                if arg_type == "string":
-                    res = res.replace("{VALUE}", f'"{arg.value}"')
-                else:
-                    res = res.replace("{VALUE}", arg.value)
 
-            res += '    {"name": "{ARG_NAME}", "value": '.replace(
-                "{ARG_NAME}", arg_name["name"]
+            res += '"{NAME}": {VALUE}'.replace("{NAME}", arg_name).replace(
+                "{VALUE}", '"' if arg_type == "string" else ""
             )
-            if arg_type == "string":
-                res += '"'
             return res
 
         return (

@@ -13,8 +13,8 @@ class Cache:
             self.__function_name_static_prompt_ids: list[int]
             self.__function_arguments_static_prompt_ids: list[int]
 
-        def build(self) -> "Cache":
-            return Cache(self)
+        def build(self) -> None:
+            Cache(self)
 
         def set_model(self, model: Model) -> Self:
             self.__model = model

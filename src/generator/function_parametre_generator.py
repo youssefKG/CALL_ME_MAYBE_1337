@@ -4,6 +4,7 @@ from src.predictors.fn_param_predictor import (
     StringState,
 )
 from src.models.function_definition_model import FunctionDefinitionModel
+from src.models.functions_call import Argument
 from src.LlmModel.model import Model
 from src.cache.cache import Cache
 from collections.abc import Generator
@@ -25,7 +26,7 @@ class FunctionArgumentsGenerator:
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__text_ids: list[int] = list()
         self.__model: Model = model
-        self.__function_arguments: list[dict[str, float | str | float]] = list()
+        self.__function_arguments: Argument = dict()
         self.__user_prompt: str = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
         self.__cache: Cache = Cache()
@@ -38,6 +39,7 @@ class FunctionArgumentsGenerator:
         for arg_name, arg_type in self.__arg_iter():
             self.__generated_tokens = str()
             self.__prepare_next_argument(arg_name, arg_type)
+            self.__log_text_ids()
             match arg_type:
                 case "number":
                     self.__generate_param_number(arg_name)
@@ -66,9 +68,7 @@ class FunctionArgumentsGenerator:
                 break
             self.__text_ids += tokens_id
         generated_arg_value: str = str(float(self.__generated_tokens))
-        self.__function_arguments.append(
-            {"name": arg_name, "value": self.__generated_tokens}
-        )
+        self.__function_arguments[arg_name] = generated_arg_value
         return generated_arg_value
 
     def __generate_string(self, arg_name: str) -> None:
@@ -92,9 +92,7 @@ class FunctionArgumentsGenerator:
                 self.__generated_tokens = self.__generated_tokens[:double_quotes_ids]
                 break
             self.__text_ids += tokens_ids
-        self.__function_arguments.append(
-            {"name": arg_name, "value": self.__generated_tokens}
-        )
+        self.__function_arguments[arg_name] = self.__generated_tokens
 
     def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, list[int]]:
         masked_logits: list[float] = self.__model.get_masked_logits(
@@ -134,5 +132,10 @@ class FunctionArgumentsGenerator:
             yield (arg_name, arg.type)
 
     @property
-    def function_arguments(self) -> list[dict[str, float | bool | str]]:
+    def function_arguments(self) -> dict[str, float | bool | str]:
         return self.__function_arguments
+
+    def __log_text_ids(self) -> None:
+        for token_id in self.__text_ids:
+            token: str = self.__model.decode(torch.tensor(token_id))
+            print(token, end="", flush=True)

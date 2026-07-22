@@ -29,6 +29,7 @@ class Cache:
             __encode_list(constants.ESCAPE_SEQUENCES)
             __encode_list(constants.NUMBERS)
             __encode_list(constants.CHAT_TEMPLATES)
+            __encode_list(constants.booleans)
             return self
 
         def set_function_name_static_prompt(self, prompt: str) -> Self:

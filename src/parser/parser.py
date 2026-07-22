@@ -49,3 +49,7 @@ class Parser:
     def fns_def_names(self) -> set[str]:
         fns_def: set[str] = set()
         return fns_def
+
+    @property
+    def output_path(self) -> str:
+        return self.__args_parser.get_output_file

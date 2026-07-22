@@ -1,0 +1,222 @@
+[
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace all vowels in 'Programming is fun parameters' with \"\\\"",
+        "parameters": {
+            "source_string": "Programming is fun parameters",
+            "regex": "([aeiouAEIOU])",
+            "replacement": " "
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace all vowels in 'Programming is fun parameters' with \"\\\\\"",
+        "parameters": {
+            "source_string": "Programming is fun parameters",
+            "regex": "([aeiouAEIOU])",
+            "replacement": "\\\\n"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace all vowels in 'Programming is fun parameters' with \"\\\"\\\"",
+        "parameters": {
+            "source_string": "Programming is fun parameters",
+            "regex": "([aeiouAEIOU])",
+            "replacement": "\\\\n"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every digit in 'abc123xyz' using regex \"\\\\d+\" with \"#\"",
+        "parameters": {
+            "source_string": "abc123xyz",
+            "regex": "\\d+",
+            "replacement": "##"
+        }
+    },
+    {
+        "name": "fn_reverse_string",
+        "prompt": "Replace every word boundary in 'the cat sat' using regex \"\\\\bcat\\\\b\" with \"dog\"",
+        "parameters": {
+            "s": "the cat sat"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every tab \"\\\\t\" with four spaces",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "\\t",
+            "replacement": "  "
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every newline \"\\\\n\" with a space",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "\\n",
+            "replacement": " "
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace \"C:\\\\Users\\\\Admin\" with \"/home/admin\"",
+        "parameters": {
+            "source_string": "C:\\rUsers\\\\Admin",
+            "regex": "C:\\rUsers\\{1,2}\\$",
+            "replacement": "home\\{1,2}\\$"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace \"\\\\\\\\server\\\\share\" with \"/mnt/share\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the string \"\\\"Hello\\\"\" with \"Hi\"",
+        "parameters": {
+            "source_string": "Hello",
+            "regex": "Hello",
+            "replacement": "Hi"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the string \"\\\\\\\"\" with \"!\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the regex \"[aeiouAEIOU]\" with \"*\"",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "aeiouAEIOU",
+            "replacement": " *"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the regex \"[A-Z]+\\\\d*\" with \"TOKEN\"",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "([A-Z]+\\b\\+\\b)",
+            "replacement": "TOKEN"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the string \"\\\\\\\\\" with \"\\\\\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace the string \"\\\\\" with \"\\\\\\\\\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_reverse_string",
+        "prompt": "Replace the Unicode escape \"\\\\u00E9\" with \"e\"",
+        "parameters": {
+            "s": "e"
+        }
+    },
+    {
+        "name": "fn_add_numbers",
+        "prompt": "Replace \"{\\\"name\\\":\\\"John\\\"}\" with \"{}\"",
+        "parameters": {
+            "a": 2.0,
+            "b": 3.0
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every occurrence of \"\\\\\" in \"C:\\\\Windows\\\\System32\" with \"/\"",
+        "parameters": {
+            "source_string": "C:\\r\\{Windows}\\r\\{System32}",
+            "regex": ".*?\\r\\{.*?}.*",
+            "replacement": "\\r\\{Windows}\\r\\{System32}"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every occurrence of \"\\\"\" with \"'\"",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "\\",
+            "replacement": "':"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every occurrence of \"\\\\\\\\\\\\\" with \"X\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every occurrence of \"\\\\\\\\\\\\\\\\\" with \"Y\"",
+        "parameters": {
+            "source_string": "string",
+            "regex": "string",
+            "replacement": "string"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace \"abc\\\\\" with \"xyz\"",
+        "parameters": {
+            "source_string": "abc\\?\\n",
+            "regex": "abc\\?\\n",
+            "replacement": "xyz"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace \"\\\\abc\" with \"xyz\"",
+        "parameters": {
+            "source_string": "abc",
+            "regex": ".*\\babc.*",
+            "replacement": "xyz"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every match of regex \"\\\\w+\\\\s+\\\\w+\" with \"PAIR\"",
+        "parameters": {
+            "source_string": "hello world",
+            "regex": "\\s+\\b\\+\\b",
+            "replacement": "PAIR"
+        }
+    },
+    {
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace every match of regex \"\\\\d{2,4}\" with \"NUM\"",
+        "parameters": {
+            "source_string": "hello",
+            "regex": "\\d{2,4}",
+            "replacement": "NUM"
+        }
+    }
+]

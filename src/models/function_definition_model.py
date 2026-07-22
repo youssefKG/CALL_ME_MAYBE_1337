@@ -4,7 +4,7 @@ from pydantic import ConfigDict
 
 
 class TypeSpec(BaseModel):
-    type: Literal["string", "number"]
+    type: Literal["string", "number", "boolean"]
     model_config: ConfigDict = ConfigDict(extra="forbid")
 
 

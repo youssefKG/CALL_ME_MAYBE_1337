@@ -3,19 +3,24 @@ from enum import Enum
 from typing import Literal
 
 
-class StringState(str, Enum):
-    START = '"'
-    ESCAPE = '"\\nrtbf.*?$[]()+{}i^'
-    CONTENT = "any"
-    FINAL = ","
+class StringState(list[str], Enum):
+    START = list('"')
+    ESCAPE = list('"\\nrtbf.*?$[]()+{}i^')
+    CONTENT = list("any")
+    FINAL = list(",")
 
 
-class NumberState(str, Enum):
-    START = "-+0123456789"
-    SIGN = "0123456789"
-    INTEGER = "0123456789."
-    FRACTION = "0123456789,"
-    FINAL = ","
+class NumberState(list[str], Enum):
+    START = list("-+0123456789")
+    SIGN = list("0123456789")
+    INTEGER = list("0123456789.")
+    FRACTION = list("0123456789,")
+    FINAL = list(",")
+
+
+class BooleanState(list[str], Enum):
+    START = ["true", "false"]
+    FINAL = list(",")
 
 
 class FunctionParametersPredictor:
@@ -23,24 +28,30 @@ class FunctionParametersPredictor:
         self.__cache: Cache = Cache()
 
     def next_tokens_ids(
-        self, content: str, arg_type: Literal["number", "string"]
+        self, content: str, arg_type: Literal["number", "string", "boolean"]
     ) -> list[int]:
-        if arg_type == "number":
-            return self.__next_number_tokens_ids(content)
-        elif arg_type == "string":
-            return self.__next_string_tokens_ids(content)
+        match arg_type:
+            case "number":
+                return self.__next_number_tokens_ids(content)
+            case "string":
+                return self.__next_string_tokens_ids(content)
+            case "boolean":
+                self.__next_boolean_tokens_ids(content)
 
     def __next_number_tokens_ids(self, num: str) -> list[int]:
         next_state: NumberState = self.__number_state(num)
         return [self.__cache.get_token_id(ch) for ch in next_state.value]
 
     def next_state(
-        self, content: str, arg_type: Literal["number", "string"]
-    ) -> NumberState | StringState:
-        if arg_type == "number":
-            return self.__number_state(content)
-        elif arg_type == "string":
-            return self.__string_state(content)
+        self, content: str, arg_type: Literal["number", "string", "boolean"]
+    ) -> NumberState | StringState | BooleanState:
+        match arg_type:
+            case "number":
+                return self.__number_state(content)
+            case "string":
+                return self.__string_state(content)
+            case "boolean":
+                return self.__boolean_state(content)
 
     def __number_state(self, num: str) -> NumberState:
         current_state: NumberState = NumberState.START
@@ -72,6 +83,23 @@ class FunctionParametersPredictor:
                 case NumberState.FINAL:
                     ...
         return current_state
+
+    def __boolean_state(self, boolean_value: str) -> BooleanState:
+        current_state: BooleanState = BooleanState.START
+        if boolean_value:
+            current_state = BooleanState.FINAL
+        return current_state
+
+    def __next_boolean_tokens_ids(self, boolean_value: str) -> list[int]:
+        current_state = self.__boolean_state(boolean_value)
+        match current_state:
+            case BooleanState.START:
+                return [
+                    self.__cache.get_token_id("true"),
+                    self.__cache.get_token_id("false"),
+                ]
+            case _:
+                return list()
 
     def __next_string_tokens_ids(self, content: str) -> list[int]:
         current_state: StringState = self.__string_state(content)

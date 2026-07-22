@@ -1,7 +1,4 @@
-from textwrap import indent
-
 from src.parser.parser import Parser
-from src.models.functions_call import FunctionsCall
 from src.LlmModel.model import Model
 from src.generator.output_generator import OutputGenerator
 from src.cache.cache import Cache
@@ -33,14 +30,9 @@ def main() -> None:
         .build()
     )
     output_generator: OutputGenerator = OutputGenerator(
-        parser.functions_definition,
-        model,
-        prompt_generator,
+        parser.functions_definition, model, prompt_generator, parser.output_path
     )
     output_generator.generate()
-
-    print()
-    print(FunctionsCall(output_generator.functions_calls).model_dump_json(indent=4))
 
 
 if __name__ == "__main__":

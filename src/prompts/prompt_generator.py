@@ -1,6 +1,5 @@
 from enum import Enum
 
-from torch.fx.node import Argument
 from src.models.prompt_model import PromptModel
 from src.models.function_definition_model import FunctionDefinitionModel
 from typing_extensions import Self

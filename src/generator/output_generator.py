@@ -2,7 +2,7 @@ from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.predictors.fn_name_predictor import FunctionNamePredictor
 from src.LlmModel.model import Model
 from src.prompts.prompt_generator import PromptGenerator
-from src.models.functions_call import FunctionCall, Argument
+from src.models.functions_call import FunctionCall, Argument, FunctionsCall
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.generator.function_name_generator import FunctionNameGenerator
 from src.generator.function_parametre_generator import FunctionArgumentsGenerator
@@ -14,6 +14,7 @@ class OutputGenerator:
         functions_definitions: list[FunctionDefinitionModel],
         model: Model,
         prompt_generator: PromptGenerator,
+        output_path: str,
     ) -> None:
         self.__functions_definitions: list[FunctionDefinitionModel] = (
             functions_definitions
@@ -25,6 +26,7 @@ class OutputGenerator:
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             FunctionParametersPredictor()
         )
+        self.__output_path: str = output_path
         self.__init_functions_name_predictor()
 
     def generate(self) -> None:
@@ -39,6 +41,7 @@ class OutputGenerator:
                     parameters=self.__function_arguments(function_definition, prompt),
                 )
                 self.__functions_calls.append(function_call)
+        self.__generate_output_file()
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
         def __get_function_definition(
@@ -81,3 +84,10 @@ class OutputGenerator:
     @property
     def functions_calls(self) -> list[FunctionCall]:
         return self.__functions_calls
+
+    def __generate_output_file(self) -> None:
+        with open(self.__output_path, "w") as output_file:
+            functions_calls_json: str = FunctionsCall(
+                self.__functions_calls
+            ).model_dump_json(indent=4)
+            output_file.write(functions_calls_json)

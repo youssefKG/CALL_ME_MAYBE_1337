@@ -39,14 +39,14 @@ class FunctionArgumentsGenerator:
         for arg_name, arg_type in self.__arg_iter():
             self.__generated_tokens = str()
             self.__prepare_next_argument(arg_name, arg_type)
-            self.__log_text_ids()
+            # self.__log_text_ids()
             match arg_type:
                 case "number":
                     self.__generate_param_number(arg_name)
                 case "string":
                     self.__generate_string(arg_name)
 
-    def __generate_param_number(self, arg_name: str) -> str:
+    def __generate_param_number(self, arg_name: str) -> None:
         next_state_for_number: NumberState
         while True:
             possible_tokens: list[int] = (
@@ -62,14 +62,11 @@ class FunctionArgumentsGenerator:
                     self.__generated_tokens, "number"
                 ),
             )
-            print(token, end="", flush=True)
             if next_state_for_number == NumberState.FINAL:
                 self.__generated_tokens = self.__generated_tokens[:-1]
                 break
             self.__text_ids += tokens_id
-        generated_arg_value: str = str(float(self.__generated_tokens))
-        self.__function_arguments[arg_name] = generated_arg_value
-        return generated_arg_value
+        self.__function_arguments[arg_name] = float(self.__generated_tokens)
 
     def __generate_string(self, arg_name: str) -> None:
         possible_tokens: list[int]
@@ -86,7 +83,6 @@ class FunctionArgumentsGenerator:
                     self.__generated_tokens, "string"
                 ),
             )
-            print(token, end="", flush=True)
             if string_state == StringState.FINAL:
                 double_quotes_ids: int = self.__generated_tokens.rindex('"')
                 self.__generated_tokens = self.__generated_tokens[:double_quotes_ids]
@@ -134,8 +130,3 @@ class FunctionArgumentsGenerator:
     @property
     def function_arguments(self) -> dict[str, float | bool | str]:
         return self.__function_arguments
-
-    def __log_text_ids(self) -> None:
-        for token_id in self.__text_ids:
-            token: str = self.__model.decode(torch.tensor(token_id))
-            print(token, end="", flush=True)

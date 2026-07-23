@@ -33,6 +33,7 @@ class Cache:
             return self
 
         def set_function_name_static_prompt(self, prompt: str) -> Self:
+            print("prompt", prompt)
             self.__function_name_static_prompt_ids = self.__model.encode_text(prompt)
             return self
 

@@ -43,25 +43,30 @@ class PromptGenerator:
     1. Read the parameter name and description.
     2. Search the user's request for an explicit value.
     3. If an explicit value exists, copy it exactly.
-    4. Otherwise, determine whether the value can be logically inferred from the request.
-    5. If it cannot be inferred with confidence, output null.
-    6. Never invent information.
-    <think>
-    - Output only the completed JSON object with no surrounding text.
-    </think>
+    4. Never invent information.
+    5- Take if from examples if it possible
 
     Examples:
     Answer: {
-    "prompt": "What is the sum of 2 and 3?",
-    "name": "fn_add_numbers",
-    "parameters": {"a": 2.0, "b": 3.0}
+    "prompt": "Replace all vowels in 'Programming is fun' with asterisks"
+    "name": "fn_substitute_string_with_regex",
+    "parameters": {
+        'source_string': 'Programming is fun',
+        'regex': '[aeiouAEIOU]',
+        'replacement': '*'
+        }
     }
 
     Answer: {
-    "prompt": "Reverse the string 'hello'",
-    "name": "fn_reverse_string",
-    "parameters": {"s": "hello"}
+    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+    "name": "fn_substitute_string_with_regex",
+    "parameters": {
+        'source_string': "Hello 34 I'm 233 years old",
+        'regex': '\\d+',
+        'replacement': 'NUMBERS'
+        }
     }
+
     """
 
         FUNCTION_ARGUMENET_DYNAMIC = """
@@ -74,8 +79,6 @@ class PromptGenerator:
     User request:
     {USER_PROMPT}
     <|im_end|>
-
-    <think>
 
     <|im_start|>Answer:
     {
@@ -134,7 +137,7 @@ class PromptGenerator:
 
         @property
         def function_name_static_prompt(self) -> str:
-            return self.__function_argument_static_prompt
+            return self.__function_name_static_prompt
 
         @property
         def function_argument_static_prompt(self) -> str:

@@ -86,8 +86,11 @@ class OutputGenerator:
         return self.__functions_calls
 
     def __generate_output_file(self) -> None:
-        with open(self.__output_path, "w") as output_file:
-            functions_calls_json: str = FunctionsCall(
-                self.__functions_calls
-            ).model_dump_json(indent=4)
-            output_file.write(functions_calls_json)
+        try:
+            with open(self.__output_path, "w") as output_file:
+                functions_calls_json: str = FunctionsCall(
+                    self.__functions_calls
+                ).model_dump_json(indent=4)
+                output_file.write(functions_calls_json)
+        except Exception:
+            pass

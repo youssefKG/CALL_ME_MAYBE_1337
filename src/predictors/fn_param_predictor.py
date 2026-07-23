@@ -5,7 +5,7 @@ from typing import Literal
 
 class StringState(list[str], Enum):
     START = list('"')
-    ESCAPE = list('"\\nrtbf.*?$[]()+{}i^')
+    ESCAPE = list('"\\nrtbdf.*?$[]()+{}i^')
     CONTENT = list("any")
     FINAL = list(",")
 
@@ -36,7 +36,7 @@ class FunctionParametersPredictor:
             case "string":
                 return self.__next_string_tokens_ids(content)
             case "boolean":
-                self.__next_boolean_tokens_ids(content)
+                return self.__next_boolean_tokens_ids(content)
 
     def __next_number_tokens_ids(self, num: str) -> list[int]:
         next_state: NumberState = self.__number_state(num)

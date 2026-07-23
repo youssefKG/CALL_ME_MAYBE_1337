@@ -40,7 +40,6 @@ class FunctionArgumentsGenerator:
         for arg_name, arg_type in self.__arg_iter():
             self.__generated_tokens = str()
             self.__prepare_next_argument(arg_name, arg_type)
-            self.__log_text_ids()
             match arg_type:
                 case "number":
                     self.__generate_number(arg_name)

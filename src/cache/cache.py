@@ -1,5 +1,5 @@
 from typing_extensions import Self
-from src.LlmModel.model import Model
+from src.llm.model import Model
 import src.constants.constants as constants
 
 
@@ -29,11 +29,10 @@ class Cache:
             __encode_list(constants.ESCAPE_SEQUENCES)
             __encode_list(constants.NUMBERS)
             __encode_list(constants.CHAT_TEMPLATES)
-            __encode_list(constants.booleans)
+            __encode_list(constants.BOOLEANS)
             return self
 
         def set_function_name_static_prompt(self, prompt: str) -> Self:
-            print("prompt", prompt)
             self.__function_name_static_prompt_ids = self.__model.encode_text(prompt)
             return self
 

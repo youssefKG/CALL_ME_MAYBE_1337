@@ -5,7 +5,7 @@ from typing import Literal
 
 class StringState(list[str], Enum):
     START = list('"')
-    ESCAPE = list('"\\nrtbdf.*?$[]()+{}i^')
+    ESCAPE = list("")
     CONTENT = list("any")
     FINAL = list(",")
 
@@ -13,7 +13,7 @@ class StringState(list[str], Enum):
 class NumberState(list[str], Enum):
     START = list("-+0123456789")
     SIGN = list("0123456789")
-    INTEGER = list("0123456789.")
+    INTEGER = list("0123456789.,")
     FRACTION = list("0123456789,")
     FINAL = list(",")
 
@@ -69,6 +69,8 @@ class FunctionParametersPredictor:
                 case NumberState.INTEGER:
                     if ch == ".":
                         current_state = NumberState.FRACTION
+                    elif ch == ",":
+                        current_state = NumberState.FINAL
                     elif interger_counter == 10:
                         current_state = NumberState.FINAL
                     else:

@@ -3,7 +3,7 @@ from src.models.function_definition_model import (
     FunctionsDefinitionRootModel,
     FunctionDefinitionModel,
 )
-from .ArgParser import ArgsParser
+from .arg_parser import ArgsParser
 from src.models.prompt_model import PromptModel, PromptsRootModel
 from typing import cast
 import json

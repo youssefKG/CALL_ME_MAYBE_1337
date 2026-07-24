@@ -66,7 +66,6 @@ class PromptGenerator:
         'replacement': 'NUMBERS'
         }
     }
-
     """
 
         FUNCTION_ARGUMENET_DYNAMIC = """
@@ -80,7 +79,7 @@ class PromptGenerator:
     {USER_PROMPT}
     <|im_end|>
 
-    <|im_start|>Answer:
+    Answer:
     {
         "name": "{FUNCTION_NAME}",
         "prompt": "{USER_PROMPT}",
@@ -170,7 +169,7 @@ class PromptGenerator:
         self,
         function_definition: FunctionDefinitionModel,
         user_prompt: str,
-        generated_arguments: dict[str, bool | float | str],
+        generated_arguments: dict[str, bool | float | str | int],
         arg_name: str,
         arg_type: str,
     ) -> str:

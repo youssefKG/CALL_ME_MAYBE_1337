@@ -43,4 +43,4 @@ NUMBERS = [
     *list("0123456789"),
 ]
 
-booleans = ["true", "false"]
+BOOLEANS = ["true", "false"]

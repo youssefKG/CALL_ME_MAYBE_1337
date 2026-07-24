@@ -1,7 +1,7 @@
 from pydantic import BaseModel, RootModel
 from typing import TypeAlias
 
-Argument: TypeAlias = dict[str, str | float | bool]
+Argument: TypeAlias = dict[str, str | float | bool | int]
 
 
 class FunctionCall(BaseModel):

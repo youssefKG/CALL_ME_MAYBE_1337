@@ -1,5 +1,9 @@
 from typing_extensions import override
 from llm_sdk.llm_sdk import Small_LLM_Model
+from src.utils.file_checker import FileChecker
+from typing import cast
+from pathlib import Path
+import json
 import torch
 
 
@@ -19,7 +23,8 @@ class Model(Small_LLM_Model):
             dtype=dtype,
             trust_remote_code=trust_remote_code,  # constructor
         )
-        self.get_vocab()
+        self.__vocab: dict[str, int]
+        self.__reverse_vocab: dict[str, str]
 
     def encode_text(self, text: str) -> list[int]:
         text_ids: list[int] = [int(x) for x in super().encode(text).flatten()]
@@ -42,6 +47,3 @@ class Model(Small_LLM_Model):
                 if idx not in hight_score_ids:
                     logits[idx] = float("-inf")
         return logits
-
-    def get_vocab(self) -> None:
-        print(self.get_path_to_vocab_file())

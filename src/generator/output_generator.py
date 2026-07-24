@@ -1,6 +1,6 @@
 from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.predictors.fn_name_predictor import FunctionNamePredictor
-from src.LlmModel.model import Model
+from src.llm.model import Model
 from src.prompts.prompt_generator import PromptGenerator
 from src.models.functions_call import FunctionCall, Argument, FunctionsCall
 from src.models.function_definition_model import FunctionDefinitionModel
@@ -41,6 +41,7 @@ class OutputGenerator:
                     parameters=self.__function_arguments(function_definition, prompt),
                 )
                 self.__functions_calls.append(function_call)
+                print(function_call.model_dump_json(indent=4))
         self.__generate_output_file()
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:

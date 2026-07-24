@@ -1,8 +1,8 @@
 from src.predictors.fn_name_predictor import FunctionNamePredictor
-from src.LlmModel.model import Model
+from src.llm.model import Model
 from src.prompts.prompt_generator import PromptGenerator
 from src.cache.cache import Cache
-import torch
+import numpy as np
 
 
 class FunctionNameGenerator:
@@ -37,14 +37,14 @@ class FunctionNameGenerator:
             logits: list[float] = self.__model.get_masked_logits(
                 self.__text_ids, possible_tokens_ids
             )
-            high_score = torch.argmax(torch.tensor(logits))
+            high_score = np.argmax(logits)
             self.__add_next_token_id(int(high_score))
         self.__fn_name = "".join(self.__function_name_tokens)
 
     def __add_next_token_id(self, id: int) -> None:
         self.__generated_ids.append(id)
         self.__text_ids.append(id)
-        token: str = self.__model.decode(torch.tensor(id))
+        token: str = self.__model.decode([id])
         self.__function_name_tokens.append(token)
 
     def __init_text_ids(self) -> None:

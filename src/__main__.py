@@ -1,5 +1,5 @@
 from src.parser.parser import Parser
-from src.LlmModel.model import Model
+from src.llm.model import Model
 from src.generator.output_generator import OutputGenerator
 from src.cache.cache import Cache
 from src.prompts.prompt_generator import PromptGenerator

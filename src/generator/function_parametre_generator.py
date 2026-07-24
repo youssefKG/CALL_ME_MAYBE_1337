@@ -4,14 +4,14 @@ from src.predictors.fn_param_predictor import (
     StringState,
     BooleanState,
 )
-from src.models.function_definition_model import FunctionDefinitionModel
+from typing import cast
+from src.models.function_definition_model import FunctionDefinitionModel, ArgumentType
 from src.models.functions_call import Argument
-from src.LlmModel.model import Model
+from src.llm.model import Model
 from src.cache.cache import Cache
 from collections.abc import Generator
 from src.prompts.prompt_generator import PromptGenerator
-import torch
-from typing import cast, Literal
+import numpy as np
 
 
 class FunctionArgumentsGenerator:
@@ -40,15 +40,15 @@ class FunctionArgumentsGenerator:
         for arg_name, arg_type in self.__arg_iter():
             self.__generated_tokens = str()
             self.__prepare_next_argument(arg_name, arg_type)
-            match arg_type:
-                case "number":
-                    self.__generate_number(arg_name)
-                case "string":
-                    self.__generate_string(arg_name)
-                case "boolean":
-                    self.__generate_boolean(arg_name)
+            if arg_type in ("float", "number", "integer"):
+                self.__generate_number()
+            elif arg_type == "string":
+                self.__generate_string()
+            elif arg_type == "boolean":
+                self.__generate_boolean()
+            self.__set_argument(arg_name, arg_type, self.__generated_tokens)
 
-    def __generate_boolean(self, arg_name: str) -> None:
+    def __generate_boolean(self) -> None:
         next_state: BooleanState
         possible_tokens_ids: list[int]
         while True:
@@ -66,11 +66,8 @@ class FunctionArgumentsGenerator:
             self.__text_ids += tokens_id
             if next_state == BooleanState.FINAL:
                 break
-            self.__function_arguments[arg_name] = (
-                True if self.__generated_tokens == "true" else False
-            )
 
-    def __generate_number(self, arg_name: str) -> None:
+    def __generate_number(self) -> None:
         next_state_for_number: NumberState
         while True:
             possible_tokens: list[int] = (
@@ -86,14 +83,32 @@ class FunctionArgumentsGenerator:
                     self.__generated_tokens, "number"
                 ),
             )
-            print(token, end="", flush=True)
             if next_state_for_number == NumberState.FINAL:
                 self.__generated_tokens = self.__generated_tokens[:-1]
                 break
             self.__text_ids += tokens_id
-        self.__function_arguments[arg_name] = float(self.__generated_tokens)
 
-    def __generate_string(self, arg_name: str) -> None:
+    def __set_argument(
+        self,
+        arg_name: str,
+        arg_type: ArgumentType,
+        arg_value: str,
+    ) -> None:
+        match arg_type:
+            case "number":
+                self.__function_arguments[arg_name] = float(arg_value)
+            case "float":
+                self.__function_arguments[arg_name] = float(arg_value)
+            case "integer":
+                self.__function_arguments[arg_name] = int(arg_value)
+            case "string":
+                self.__function_arguments[arg_name] = arg_value
+            case "boolean":
+                self.__function_arguments[arg_name] = (
+                    True if arg_value == "true" else False
+                )
+
+    def __generate_string(self) -> None:
         possible_tokens: list[int]
         string_state: StringState
         while True:
@@ -108,25 +123,18 @@ class FunctionArgumentsGenerator:
                     self.__generated_tokens, "string"
                 ),
             )
-            print(token, end="", flush=True)
             if string_state == StringState.FINAL:
                 double_quotes_ids: int = self.__generated_tokens.rindex('"')
                 self.__generated_tokens = self.__generated_tokens[:double_quotes_ids]
                 break
             self.__text_ids += tokens_ids
-        self.__function_arguments[arg_name] = self.__generated_tokens
 
     def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, list[int]]:
         masked_logits: list[float] = self.__model.get_masked_logits(
             self.__text_ids, high_score_tokens
         )
-        tokens_id: list[int] = cast(
-            list[int], [torch.argmax(torch.tensor(masked_logits))]
-        )
-        token: str = self.__model.decode(torch.tensor(tokens_id[0]))
-        if "\\" in token:
-            token = token[: token.index("\\") + 1]
-            tokens_id = self.__model.encode_text(token)
+        tokens_id: list[int] = cast(list[int], [np.argmax(masked_logits)])
+        token: str = self.__model.decode([tokens_id[0]])
         return (token, tokens_id)
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
@@ -143,21 +151,15 @@ class FunctionArgumentsGenerator:
     def __set_static_prompt_ids(self) -> None:
         self.__text_ids = self.__cache.function_arguments_static_prompt_ids
 
-    def __prepare_next_argument(
-        self, arg_name: str, arg_type: Literal["boolean", "string", "number"]
-    ) -> None:
+    def __prepare_next_argument(self, arg_name: str, arg_type: ArgumentType) -> None:
         self.__set_static_prompt_ids()
         self.__set_dynamic_prompt(arg_name, arg_type)
 
     def __arg_iter(
         self,
-    ) -> Generator[tuple[str, Literal["string", "number", "boolean"]]]:
+    ) -> Generator[tuple[str, ArgumentType]]:
         for arg_name, arg in self.__function_definition.parameters.items():
             yield (arg_name, arg.type)
-
-    def __log_text_ids(self) -> None:
-        for token_id in self.__text_ids:
-            print(self.__model.decode(torch.tensor(token_id)), end="", flush=True)
 
     @property
     def function_arguments(self) -> dict[str, float | bool | str]:

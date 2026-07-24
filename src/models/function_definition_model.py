@@ -1,10 +1,12 @@
-from typing import Literal
+from typing import Literal, TypeAlias
 from pydantic import BaseModel, RootModel
 from pydantic import ConfigDict
 
+ArgumentType: TypeAlias = Literal["string", "number", "boolean", "float", "integer"]
+
 
 class TypeSpec(BaseModel):
-    type: Literal["string", "number", "boolean"]
+    type: ArgumentType
     model_config: ConfigDict = ConfigDict(extra="forbid")
 
 

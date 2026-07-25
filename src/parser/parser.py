@@ -14,11 +14,13 @@ class Parser:
         self.__args_parser: ArgsParser = ArgsParser(args)
         self.__prompts: list[PromptModel]
         self.__function_defintions: list[FunctionDefinitionModel]
+        self.__model_name: str
 
     def parse(self) -> None:
         self.__args_parser.parse()
         self.__parse_prompts()
         self.__parse_functions_definition()
+        self.__parse_model_name()
 
     def __parse_functions_definition(self) -> None:
         functions_definition_file_content: str = Path(
@@ -28,6 +30,9 @@ class Parser:
             functions_definition_file_content
         )
         self.__function_defintions = function_definions_validator.root
+
+    def __parse_model_name(self) -> None:
+        self.__model_name = self.__args_parser.model_name
 
     def __parse_prompts(self) -> None:
         input_file_content: str = Path(
@@ -53,3 +58,7 @@ class Parser:
     @property
     def output_path(self) -> str:
         return self.__args_parser.get_output_file
+
+    @property
+    def model_name(self) -> str:
+        return self.__model_name

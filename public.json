@@ -58,7 +58,7 @@
         "name": "fn_read_file",
         "prompt": "Read the file at /home/user/data.json with utf-8 encoding",
         "parameters": {
-            "path": "home/user/data.json",
+            "path": "data.json",
             "encoding": "utf-8"
         }
     },
@@ -81,7 +81,7 @@
         "name": "fn_format_template",
         "prompt": "Format template: Say \"hello\" to {name}",
         "parameters": {
-            "template": "hello {name}"
+            "template": "Say "
         }
     }
 ]

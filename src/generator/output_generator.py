@@ -1,3 +1,4 @@
+from log.log import Log, LogRow
 from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.predictors.fn_name_predictor import FunctionNamePredictor
 from src.llm.model import Model
@@ -6,6 +7,7 @@ from src.models.functions_call import FunctionCall, Argument, FunctionsCall
 from src.models.function_definition_model import FunctionDefinitionModel
 from src.generator.function_name_generator import FunctionNameGenerator
 from src.generator.function_parametre_generator import FunctionArgumentsGenerator
+from src.log.log import Log
 
 
 class OutputGenerator:
@@ -20,6 +22,7 @@ class OutputGenerator:
             functions_definitions
         )
         self.__model: Model = model
+        self.__log: Log = Log()
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__functions_calls: list[FunctionCall] = list()
         self.__function_name_predictor: FunctionNamePredictor
@@ -28,13 +31,17 @@ class OutputGenerator:
         )
         self.__output_path: str = output_path
         self.__init_functions_name_predictor()
+        self.__init_log()
 
     def generate(self) -> None:
-        for prompt in self.__prompt_generator.iter_prompts():
+        for id, prompt in enumerate(self.__prompt_generator.iter_prompts()):
             function_definition: FunctionDefinitionModel | None = (
                 self.__function_definition(prompt)
             )
             if function_definition:
+                self.__log.add_row(
+                    LogRow(id, prompt, function_definition.model_dump_json(indent=4))
+                )
                 function_call: FunctionCall = FunctionCall(
                     name=function_definition.name,
                     prompt=prompt,
@@ -95,3 +102,11 @@ class OutputGenerator:
                 output_file.write(functions_calls_json)
         except Exception:
             pass
+
+    def __init_log(self) -> None:
+        self.__log.add_rows(
+            [
+                LogRow(id, prompt)
+                for id, prompt in enumerate(self.__prompt_generator.iter_prompts())
+            ]
+        )

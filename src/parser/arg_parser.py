@@ -18,26 +18,29 @@ class ArgsParser:
         self.__output_file: str | None = None
         self.__input_file_file: str | None = None
         self.__functions_definition_file: str | None = None
+        self.__model_name: str = "Qwen/Qwen3-0.6B"
 
     def parse(self) -> None:
         idx: int = 0
         while idx < len(self.__args):
             option: str = self.__args[idx]
-            file_path: str | None = (
+            arg_value: str | None = (
                 self.__args[idx + 1] if idx + 1 < len(self.__args) else None
             )
-            self.__set_file(option, file_path)
+            self.__set_arg_value(option, arg_value)
             idx += 2
         self.__set_default_values()
 
-    def __set_file(self, option: str, file_path: str | None = None) -> None:
+    def __set_arg_value(self, option: str, arg_value: str | None = None) -> None:
         match option:
             case "--input":
-                self.__set_input_file(file_path)
+                self.__set_input_file(arg_value)
             case "--output":
-                self.__set_output_file(file_path)
+                self.__set_output_file(arg_value)
             case "--functions_definition":
-                self.__set_functions_definition_file(file_path)
+                self.__set_functions_definition_file(arg_value)
+            case "--model_name":
+                self.__set_model_name(arg_value)
             case _:
                 self.__raise_unknown_option(option)
 
@@ -79,6 +82,12 @@ class ArgsParser:
         if self.__functions_definition_file is None:
             self.__raise_missing_functions_definition_file()
 
+    def __set_model_name(self, model_name: str | None) -> None:
+        if model_name:
+            self.__model_name = model_name
+        else:
+            self.__raise_missing_value_after_option("--model_name")
+
     @property
     def get_output_file(self) -> str:
         return cast(str, self.__output_file)
@@ -90,6 +99,10 @@ class ArgsParser:
     @property
     def get_functions_definition_file(self) -> str:
         return cast(str, self.__functions_definition_file)
+
+    @property
+    def model_name(self) -> str:
+        return self.__model_name
 
     # ------------------------------ start Errors ---------------------------
     def __raise_unknown_option(self, option: str) -> None:

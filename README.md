@@ -44,3 +44,7 @@ https://mbrenndoerfer.com/writing/constrained-decoding-structured-llm-output
 ### Finite state machine for generating floating number
 https://ifnotnil.com/t/finite-state-machines/323
 
+### Temerature simpling:
+https://mbrenndoerfer.com/writing/hallucination-mitigation
+### soft max:
+https://mbrenndoerfer.com/writing/decoding-temperature-language-model-generation

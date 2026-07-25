@@ -55,38 +55,42 @@ class FunctionArgumentsGenerator:
             possible_tokens_ids = self.__function_parameters_predictor.next_tokens_ids(
                 self.__generated_tokens, "boolean"
             )
-            token, tokens_id = self.__get_next_token(possible_tokens_ids)
+            token, token_id = self.__get_next_token(possible_tokens_ids)
             next_state = cast(
                 BooleanState,
                 self.__function_parameters_predictor.next_state(
                     self.__generated_tokens, "boolean"
                 ),
             )
+            print(token, end="", flush=True)
             self.__generated_tokens += token
-            self.__text_ids += tokens_id
+            self.__text_ids.append(token_id)
             if next_state == BooleanState.FINAL:
                 break
 
     def __generate_number(self) -> None:
-        next_state_for_number: NumberState
+        current_state: NumberState
         while True:
             possible_tokens: list[int] = (
                 self.__function_parameters_predictor.next_tokens_ids(
                     self.__generated_tokens, "number"
                 )
             )
-            token, tokens_id = self.__get_next_token(possible_tokens)
+            token, token_id = self.__get_next_token(possible_tokens)
             self.__generated_tokens += token
-            next_state_for_number = cast(
+            current_state = cast(
                 NumberState,
                 self.__function_parameters_predictor.next_state(
                     self.__generated_tokens, "number"
                 ),
             )
-            if next_state_for_number == NumberState.FINAL:
-                self.__generated_tokens = self.__generated_tokens[:-1]
+            print(token, end="", flush=True)
+            if current_state == NumberState.FINAL:
+                if "," in self.__generated_tokens:
+                    semi_column_idx: int = self.__generated_tokens.rindex(",")
+                    self.__generated_tokens = self.__generated_tokens[:semi_column_idx]
                 break
-            self.__text_ids += tokens_id
+            self.__text_ids.append(token_id)
 
     def __set_argument(
         self,
@@ -110,32 +114,39 @@ class FunctionArgumentsGenerator:
 
     def __generate_string(self) -> None:
         possible_tokens: list[int]
-        string_state: StringState
+        current_state: StringState
         while True:
             possible_tokens = self.__function_parameters_predictor.next_tokens_ids(
                 self.__generated_tokens, "string"
             )
-            token, tokens_ids = self.__get_next_token(possible_tokens)
+            token, token_id = self.__get_next_token(possible_tokens)
             self.__generated_tokens += token
-            string_state = cast(
+            current_state = cast(
                 StringState,
                 self.__function_parameters_predictor.next_state(
                     self.__generated_tokens, "string"
                 ),
             )
-            if string_state == StringState.FINAL:
-                double_quotes_ids: int = self.__generated_tokens.rindex('"')
-                self.__generated_tokens = self.__generated_tokens[:double_quotes_ids]
+            print(token, end="", flush=True)
+            if current_state == StringState.FINAL or (
+                current_state == StringState.CONTENT
+                and len(self.__generated_tokens) >= len(self.__user_prompt)
+            ):
+                if '"' in self.__generated_tokens:
+                    double_quotes_ids: int = self.__generated_tokens.rindex('"')
+                    self.__generated_tokens = self.__generated_tokens[
+                        :double_quotes_ids
+                    ]
                 break
-            self.__text_ids += tokens_ids
+            self.__text_ids.append(token_id)
 
-    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, list[int]]:
+    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, int]:
         masked_logits: list[float] = self.__model.get_masked_logits(
             self.__text_ids, high_score_tokens
         )
-        tokens_id: list[int] = cast(list[int], [np.argmax(masked_logits)])
-        token: str = self.__model.decode([tokens_id[0]])
-        return (token, tokens_id)
+        token_id: int = cast(int, np.argmax(masked_logits))
+        token: str = self.__model.decode([token_id])
+        return (token, token_id)
 
     def __set_dynamic_prompt(self, arg_name: str, arg_type: str) -> None:
         dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(

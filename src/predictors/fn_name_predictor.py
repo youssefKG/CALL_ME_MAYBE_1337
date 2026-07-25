@@ -1,3 +1,6 @@
+from src.cache.cache import Cache
+
+
 class TrieNode:
     def __init__(self, val: int | None = None) -> None:
         self.val: int | None = val
@@ -39,13 +42,17 @@ class FunctionNamePredictor:
         self,
     ) -> None:
         self.__fns_names_ids_trie: Trie = Trie()
+        self.__cache: Cache = Cache()
 
     def set_fns_names_ids_trie(self, fns_names_ids: list[list[int]]) -> None:
         for fn_ids in fns_names_ids:
             self.__fns_names_ids_trie.add(fn_ids)
 
     def get_next_predictions_ids(self, ids: list[int]) -> list[int]:
-        return self.__fns_names_ids_trie.get_children(ids)
+        next_possible_tokens: list[int] = self.__fns_names_ids_trie.get_children(ids)
+        next_possible_tokens.append(self.__cache.get_token_id(","))
+        next_possible_tokens.append(self.__cache.get_token_id('"'))
+        return next_possible_tokens
 
     def is_completed(self, ids: list[int]) -> bool:
         return self.__fns_names_ids_trie.search(ids)

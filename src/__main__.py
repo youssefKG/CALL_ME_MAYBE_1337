@@ -1,3 +1,4 @@
+from src.log.log import Log
 from src.parser.parser import Parser
 from src.llm.model import Model
 from src.generator.output_generator import OutputGenerator
@@ -8,9 +9,9 @@ import sys
 
 
 def main() -> None:
-    model: Model = Model()
     parser: Parser = Parser(sys.argv)
     parser.parse()
+    model: Model = Model(parser.model_name)
     prompt_generator: PromptGenerator = (
         PromptGenerator.Builder()
         .set_function_definitions(parser.functions_definition)

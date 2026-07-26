@@ -1,4 +1,3 @@
-from src.log.log import Log
 from src.parser.parser import Parser
 from src.llm.model import Model
 from src.generator.output_generator import OutputGenerator

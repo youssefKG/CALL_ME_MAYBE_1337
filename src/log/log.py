@@ -2,7 +2,6 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Self
 
-from src.models.functions_call import FunctionCall
 import sys
 import os
 
@@ -78,11 +77,11 @@ class LogRow:
         id: int,
         prompt: str,
         function_defintion: str = "",
-        generated_arguments: str = "",
+        function_call: str = "",
     ) -> None:
         self.prompt: str = prompt
         self.function_defintion: str = function_defintion
-        self.generated_arguments: str = generated_arguments
+        self.function_call: str = function_call
         self.id: int = id
 
 
@@ -95,30 +94,28 @@ class Log:
         return cls.__instance
 
     def __init__(self) -> None:
-        self.__table: Table = Table(title="CALL_ME_BABY", show_lines=True)
         self.__console: Console = Console()
         self.__rows: dict[int, LogRow] = dict()
-        self.__init_table()
 
     def __update(self) -> None:
         os.system("cls" if os.name == "nt" else "clear")
-        self.__console.print(self.__table)
-        sys.stdout.flush()
+        table: Table = Table(title="CALL_ME_BABY", show_lines=True)
+        table.add_column("Prompt", no_wrap=False, width=40)
+        table.add_column("Function Definition", no_wrap=False, width=80)
+        table.add_column("Funtion Call", no_wrap=False, width=80)
         for id, row in self.__rows.items():
-            self.__table.add_row(
+            table.add_row(
                 f"{id}-[green]{row.prompt}",
                 f"[magenta]{row.function_defintion}",
-                row.generated_arguments,
+                f"{row.function_call}",
             )
+        self.__console.print(table)
+        sys.stdout.flush()
 
-    def __init_table(self) -> None:
-        self.__table.add_column("Prompt", no_wrap=True)
-        self.__table.add_column("Function Definition", no_wrap=True)
-        self.__table.add_column("Generated_arguments", no_wrap=True)
-
-    def add_row(self, row: LogRow) -> None:
+    def add_row(self, row: LogRow, status: str = "") -> None:
         self.__rows[row.id] = row
         self.__update()
+        self.__console.print(status)
 
     def add_rows(self, rows: list[LogRow]) -> None:
         for row in rows:

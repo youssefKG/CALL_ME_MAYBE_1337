@@ -80,7 +80,9 @@ class PromptGenerator:
     <|im_end|>
 
     Answer:
-    {
+    """
+
+        FUNCTION_CALL = """{
         "name": "{FUNCTION_NAME}",
         "prompt": "{USER_PROMPT}",
         "parameters": {
@@ -185,6 +187,27 @@ class PromptGenerator:
             res += ")"
             return res
 
+        function_argument_description: str = (
+            PromptGenerator.PromptType.FUNCTION_ARGUMENET_DYNAMIC.value.replace(
+                "{FUNCTION}", __format_the_function_prototype(function_definition)
+            )
+            .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
+            .replace("{USER_PROMPT}", user_prompt)
+        )
+        function_call: str = self.function_call_prompt(
+            user_prompt, function_definition, generated_arguments, arg_name, arg_type
+        )
+
+        return function_argument_description + function_call
+
+    def function_call_prompt(
+        self,
+        user_prompt: str,
+        function_definition: FunctionDefinitionModel,
+        generated_arguments: dict[str, str | float | bool],
+        arg_name: str,
+        arg_type: str,
+    ) -> str:
         def __format_generated_argument(
             generated_argument: dict[str, str | float | bool],
             arg_name: str,
@@ -202,11 +225,9 @@ class PromptGenerator:
             return res
 
         return (
-            PromptGenerator.PromptType.FUNCTION_ARGUMENET_DYNAMIC.value.replace(
-                "{FUNCTION}", __format_the_function_prototype(function_definition)
+            PromptGenerator.PromptType.FUNCTION_CALL.value.replace(
+                "{USER_PROMPT}", user_prompt
             )
-            .replace("{USER_PROMPT}", user_prompt)
-            .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
             .replace("{FUNCTION_NAME}", function_definition.name)
             .replace(
                 "{GENERATED_ARGUMENTS}",

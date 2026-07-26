@@ -1,87 +1,87 @@
 [
     {
-        "name": "fn_multiply_numbers",
-        "prompt": "What is the product of 3 and 5?",
+        "name": "fn_add_numbers",
+        "prompt": "What is the sum of 2 and 3?",
         "parameters": {
-            "a": 3.0,
-            "b": 5.0
+            "a": 2.0,
+            "b": 3.0
         }
     },
     {
-        "name": "fn_multiply_numbers",
-        "prompt": "What is the product of 12 and 4?",
+        "name": "fn_add_numbers",
+        "prompt": "What is the sum of 265 and 345?",
         "parameters": {
-            "a": 12.0,
-            "b": 4.0
+            "a": 265.0,
+            "b": 345.0
         }
     },
     {
-        "name": "fn_is_even",
-        "prompt": "Is 4 an even number?",
+        "name": "fn_greet",
+        "prompt": "Greet shrek",
         "parameters": {
-            "n": 4
+            "name": "shrek"
         }
     },
     {
-        "name": "fn_is_even",
-        "prompt": "Is 7 an even number?",
+        "name": "fn_greet",
+        "prompt": "Greet john",
         "parameters": {
-            "n": 7
+            "name": "john"
         }
     },
     {
-        "name": "fn_calculate_compound_interest",
-        "prompt": "Calculate compound interest on 1234567.89 at 0.0375 rate for 23 years",
+        "name": "fn_reverse_string",
+        "prompt": "Reverse the string 'hello'",
         "parameters": {
-            "principal": 1234567.89,
-            "rate": 0.0375,
-            "years": 23
+            "s": "hello"
         }
     },
     {
-        "name": "fn_execute_sql_query",
-        "prompt": "Execute SQL query 'SELECT * FROM users' on the production database",
+        "name": "fn_reverse_string",
+        "prompt": "Reverse the string 'world'",
         "parameters": {
-            "query": "SELECT * FROM users",
-            "database": "production"
+            "s": "world"
         }
     },
     {
-        "name": "fn_execute_sql_query",
-        "prompt": "Run the query 'INSERT INTO logs VALUES (1, 2, 3)' on the system database",
+        "name": "fn_get_square_root",
+        "prompt": "What is the square root of 16?",
         "parameters": {
-            "query": "INSERT INTO logs VALUES (1, 2, 3)",
-            "database": "system"
+            "a": 16.0
         }
     },
     {
-        "name": "fn_read_file",
-        "prompt": "Read the file at /home/user/data.json with utf-8 encoding",
+        "name": "fn_get_square_root",
+        "prompt": "Calculate the square root of 144",
         "parameters": {
-            "path": "data.json",
-            "encoding": "utf-8"
+            "a": 144.0
         }
     },
     {
-        "name": "fn_read_file",
-        "prompt": "Read C:\\Users\\john\\config.ini with latin-1 encoding",
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS",
         "parameters": {
-            "path": "C:\\\\Users\\\\john\\\\config.ini",
-            "encoding": "latin-1"
+            "source_string": "Hello 34 I'm 233 years old",
+            "regex": "(\\d+)",
+            "replacement": "NUMBERS"
         }
     },
     {
-        "name": "fn_format_template",
-        "prompt": "Format template: Hello {user}'s profile!",
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Replace all vowels in 'Programming is fun' with asterisks",
         "parameters": {
-            "template": "Hello {user}'s profile!"
+            "source_string": "Programming is fun",
+            "regex": "aeiouAEIOU",
+            "replacement": "asterisks"
         }
     },
     {
-        "name": "fn_format_template",
-        "prompt": "Format template: Say \"hello\" to {name}",
+        "name": "fn_substitute_string_with_regex",
+        "prompt": "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'",
         "parameters": {
-            "template": "Say "
+            "source_string": "The cat sat on the mat with another cat",
+            "regex": "cat",
+            "replacement": "dog"
         }
     }
 ]

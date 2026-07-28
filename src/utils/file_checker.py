@@ -1,3 +1,4 @@
+from nt import write
 import os
 
 
@@ -22,6 +23,13 @@ class FileChecker:
         is_exist: bool = os.access(file_path, os.F_OK)
         if not is_exist:
             raise FileError(
-                f"FileError:\nMap file '{file_path}' was not found.\nPlease"
+                f"FileError:\nOutput file '{file_path}' was not found.\nPlease"
                 + "provide a valid path to an existing configuration file."
+            )
+
+    def check_file_is_writable(self, file_path: str) -> None:
+        is_writable: bool = os.access(file_path, os.W_OK)
+        if not is_writable:
+            raise FileError(
+                f"Error: You do not have permission to write to {file_path}."
             )

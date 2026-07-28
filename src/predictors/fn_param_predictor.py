@@ -78,7 +78,7 @@ class FunctionParametersPredictor:
                 case NumberState.FRACTION:
                     if ch == "," or ch not in NumberState.SIGN.value:
                         current_state = NumberState.FINAL
-                    elif fraction_counter == 6:
+                    elif fraction_counter == 10:
                         current_state = NumberState.FINAL
                     else:
                         fraction_counter += 1

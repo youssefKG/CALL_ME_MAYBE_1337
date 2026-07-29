@@ -1,10 +1,7 @@
-from uuid import UUID
-
 from numpy.random import f
 from rich.console import Console
 from rich.table import Table
 from src.models.prompt_model import PromptModel
-from typing_extensions import Self
 
 import sys
 import os

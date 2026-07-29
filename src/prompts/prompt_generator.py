@@ -7,9 +7,8 @@ from collections.abc import Generator
 import json
 
 
-class PromptGenerator:
-    class PromptType(str, Enum):
-        FUNCTIONS_NAME_STATIC = """
+class PromptType(str, Enum):
+    FUNCTIONS_NAME_STATIC = """
     Instructions:
     - Read the available function definitions.
     - Select the single function that best matches the user's request.
@@ -23,11 +22,11 @@ class PromptGenerator:
     {FUNCTIONS}
     """
 
-        FUNCTION_NAME_DYNAMIC = """
+    FUNCTION_NAME_DYNAMIC = """
     User request: {USER_PROMPT}
     Answer: """
 
-        FUNCTION_ARGUMENT_STATIC = """
+    FUNCTION_ARGUMENT_STATIC = """
     <|im_start|>
     You are completing a function call.
 
@@ -67,7 +66,7 @@ class PromptGenerator:
     }
     """
 
-        FUNCTION_ARGUMENET_DYNAMIC = """
+    FUNCTION_ARGUMENET_DYNAMIC = """
     Function:
     {FUNCTION}
 
@@ -81,12 +80,14 @@ class PromptGenerator:
     Answer:
     """
 
-        FUNCTION_CALL = """{
+    FUNCTION_CALL = """{
         "name": "{FUNCTION_NAME}",
         "prompt": "{USER_PROMPT}",
         "parameters": {
             {GENERATED_ARGUMENTS}"""
 
+
+class PromptGenerator:
     class Builder:
         def __init__(
             self,
@@ -116,7 +117,7 @@ class PromptGenerator:
                 return json.dumps(function_info)
 
             self.__function_name_static_prompt = (
-                PromptGenerator.PromptType.FUNCTIONS_NAME_STATIC.value.replace(
+                PromptType.FUNCTIONS_NAME_STATIC.value.replace(
                     "{FUNCTIONS}", __get_fns_def()
                 )
             )
@@ -124,7 +125,7 @@ class PromptGenerator:
 
         def set_function_argument_static_prompt(self) -> Self:
             self.__function_argument_static_prompt = (
-                PromptGenerator.PromptType.FUNCTION_ARGUMENT_STATIC.value
+                PromptType.FUNCTION_ARGUMENT_STATIC.value
             )
             return self
 
@@ -162,9 +163,7 @@ class PromptGenerator:
             yield prompt
 
     def function_name_dynamic_prompt(self, prompt: str) -> str:
-        return PromptGenerator.PromptType.FUNCTION_NAME_DYNAMIC.value.replace(
-            "{USER_PROMPT}", prompt
-        )
+        return PromptType.FUNCTION_NAME_DYNAMIC.value.replace("{USER_PROMPT}", prompt)
 
     def function_argument_dynamic_prompt(
         self,
@@ -187,7 +186,7 @@ class PromptGenerator:
             return res
 
         function_argument_description: str = (
-            PromptGenerator.PromptType.FUNCTION_ARGUMENET_DYNAMIC.value.replace(
+            PromptType.FUNCTION_ARGUMENET_DYNAMIC.value.replace(
                 "{FUNCTION}", __format_the_function_prototype(function_definition)
             )
             .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
@@ -224,9 +223,7 @@ class PromptGenerator:
             return res
 
         return (
-            PromptGenerator.PromptType.FUNCTION_CALL.value.replace(
-                "{USER_PROMPT}", user_prompt
-            )
+            PromptType.FUNCTION_CALL.value.replace("{USER_PROMPT}", user_prompt)
             .replace("{FUNCTION_NAME}", function_definition.name)
             .replace(
                 "{GENERATED_ARGUMENTS}",

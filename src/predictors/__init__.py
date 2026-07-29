@@ -1,5 +1,16 @@
-from .fn_name_predictor import FunctionNamePredictor
+from .function_name_predictor import FunctionNamePredictor
 
-from .fn_param_predictor import FunctionParametersPredictor
+from .function_parameters_predictor import (
+    FunctionParametersPredictor,
+    NumberState,
+    StringState,
+    BooleanState,
+)
 
-__all__ = ["FunctionNamePredictor", "FunctionParametersPredictor"]
+__all__ = [
+    "FunctionNamePredictor",
+    "FunctionParametersPredictor",
+    "NumberState",
+    "StringState",
+    "BooleanState",
+]

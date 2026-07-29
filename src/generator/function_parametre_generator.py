@@ -1,5 +1,5 @@
 from src.models.prompt_model import PromptModel
-from src.predictors.fn_param_predictor import (
+from src.predictors import (
     FunctionParametersPredictor,
     NumberState,
     StringState,
@@ -8,7 +8,7 @@ from src.predictors.fn_param_predictor import (
 from typing import cast, Literal
 from src.models.function_definition_model import FunctionDefinitionModel, ArgumentType
 from src.log.log import Log, LogRow
-from src.models.functions_call import Argument
+from src.models import Argument
 from src.llm.model import Model
 from src.cache.cache import Cache
 from collections.abc import Generator
@@ -198,6 +198,3 @@ class FunctionArgumentsGenerator:
     @property
     def function_arguments(self) -> dict[str, float | bool | str]:
         return self.__function_arguments
-
-    def __log_text_ids(self) -> None:
-        print(self.__model.decode(self.__text_ids), end="", flush=True)

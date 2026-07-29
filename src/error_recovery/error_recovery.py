@@ -5,7 +5,7 @@ from src.models.function_definition_model import (
     FunctionDefinitionModel,
 )
 from src.models.prompt_model import PromptModel
-from src.models.functions_call import FunctionCall, FunctionsCall
+from src.models import FunctionCallModel, FunctionCallRootModel
 from pathlib import Path
 
 
@@ -23,7 +23,7 @@ class ErrorRecovery:
             function_definitions
         )
         self.__prompts: list[PromptModel] = prompts
-        self.__generated_functions_call: list[FunctionCall] = list()
+        self.__generated_functions_call: list[FunctionCallModel] = list()
         self.__generated_prompts: list[str] = list()
         self.__remaining_prompts: list[PromptModel] = list()
         self.__log: Log = log
@@ -63,7 +63,7 @@ class ErrorRecovery:
 
     def __set_generated_functions_call(self) -> None:
         functions_call_content: str = Path(self.__output_path).read_text()
-        self.__generated_functions_call = FunctionsCall.model_validate_json(
+        self.__generated_functions_call = FunctionCallRootModel.model_validate_json(
             functions_call_content
         ).root
 
@@ -78,7 +78,7 @@ class ErrorRecovery:
 
     def __is_valid_arguments(
         self,
-        function_call: FunctionCall,
+        function_call: FunctionCallModel,
         function_definition: FunctionDefinitionModel | None,
     ) -> bool:
         if function_definition:
@@ -112,7 +112,7 @@ class ErrorRecovery:
         return self.__remaining_prompts
 
     @property
-    def generated_functions_calls(self) -> list[FunctionCall]:
+    def generated_functions_calls(self) -> list[FunctionCallModel]:
         return self.__generated_functions_call
 
     def __init_log(self) -> None:

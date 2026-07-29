@@ -61,7 +61,7 @@ class ArgsParser:
             self.__raise_duplicated_option("output")
         if file_path is None:
             return self.__raise_missing_value_after_option("--output")
-        FileChecker.check_file_is_writable(file_path)
+        # FileChecker.check_file_is_writable(file_path)
         FileChecker.check_file_is_readable(file_path)
         self.__output_file = file_path
 

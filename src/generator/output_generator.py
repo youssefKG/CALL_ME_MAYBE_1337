@@ -1,10 +1,17 @@
-from src.log.log import Log, LogRow
+from collections.abc import Generator
+
+from src.models import (
+    PromptModel,
+    FunctionsCall,
+    FunctionCall,
+    Argument,
+    FunctionDefinitionModel,
+)
+from src.log import Log, LogRow
 from src.predictors.fn_param_predictor import FunctionParametersPredictor
 from src.predictors.fn_name_predictor import FunctionNamePredictor
 from src.llm.model import Model
 from src.prompts.prompt_generator import PromptGenerator
-from src.models.functions_call import FunctionCall, Argument, FunctionsCall
-from src.models.function_definition_model import FunctionDefinitionModel
 from src.generator.function_name_generator import FunctionNameGenerator
 from src.generator.function_parametre_generator import FunctionArgumentsGenerator
 
@@ -12,8 +19,13 @@ from src.generator.function_parametre_generator import FunctionArgumentsGenerato
 class OutputGenerator:
     def __init__(
         self,
-        functions_definitions: list[FunctionDefinitionModel],
         model: Model,
+        /,
+        *,
+        log: Log,
+        remaining_prompts: list[PromptModel],
+        generated_functions_call: list[FunctionCall],
+        functions_definitions: list[FunctionDefinitionModel],
         prompt_generator: PromptGenerator,
         output_path: str,
     ) -> None:
@@ -22,43 +34,41 @@ class OutputGenerator:
         )
         self.__model: Model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
-        self.__functions_calls: list[FunctionCall] = list()
+        self.__remaining_prompts: list[PromptModel] = remaining_prompts
+        self.__functions_calls: list[FunctionCall] = generated_functions_call
         self.__function_name_predictor: FunctionNamePredictor
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             FunctionParametersPredictor()
         )
         self.__output_path: str = output_path
-        self.__log: Log = Log()
+        self.__log: Log = log
         self.__init_functions_name_predictor()
-        self.__init_log()
 
     def generate(self) -> None:
-        for id, prompt in enumerate(self.__prompt_generator.iter_prompts()):
+        for prompt in self.__iter_prompts():
             self.__log.add_row(
-                LogRow(id, prompt, "Generating..."),
+                LogRow(prompt.id, prompt.prompt, "Generating..."),
                 status=f"{id}-Generating function definition",
             )
             function_definition: FunctionDefinitionModel | None = (
-                self.__function_definition(prompt)
+                self.__function_definition(prompt.prompt)
             )
             if function_definition:
                 function_call: FunctionCall = FunctionCall(
                     name=function_definition.name,
-                    prompt=prompt,
-                    parameters=self.__function_arguments(
-                        function_definition, prompt, id
-                    ),
+                    prompt=prompt.prompt,
+                    parameters=self.__function_arguments(function_definition, prompt),
                 )
                 self.__functions_calls.append(function_call)
                 self.__log.add_row(
                     LogRow(
-                        id,
-                        prompt,
+                        prompt.id,
+                        prompt.prompt,
                         function_definition.model_dump_json(indent=4),
                         function_call.model_dump_json(indent=4),
                     )
                 )
-        self.__generate_output_file()
+            self.__generate_output_file()
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
         def __get_function_definition(
@@ -79,12 +89,11 @@ class OutputGenerator:
         return __get_function_definition(function_name_generator.fn_name)
 
     def __function_arguments(
-        self, function_definition: FunctionDefinitionModel, prompt: str, id: int
+        self, function_definition: FunctionDefinitionModel, prompt: PromptModel
     ) -> Argument:
         function_argument_generator = FunctionArgumentsGenerator(
             prompt_generator=self.__prompt_generator,
             user_prompt=prompt,
-            prompt_id=id,
             function_definition=function_definition,
             model=self.__model,
             function_parameters_predictor=self.__function_parameters_predictor,
@@ -117,7 +126,11 @@ class OutputGenerator:
     def __init_log(self) -> None:
         self.__log.add_rows(
             [
-                LogRow(id, prompt)
-                for id, prompt in enumerate(self.__prompt_generator.iter_prompts())
+                LogRow(prompt.id, prompt.prompt)
+                for prompt in self.__prompt_generator.iter_prompts()
             ]
         )
+
+    def __iter_prompts(self) -> Generator[PromptModel]:
+        for prompt in self.__remaining_prompts:
+            yield prompt

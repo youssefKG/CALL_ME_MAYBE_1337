@@ -1,3 +1,4 @@
+from src.models.prompt_model import PromptModel
 from src.predictors.fn_param_predictor import (
     FunctionParametersPredictor,
     NumberState,
@@ -20,8 +21,7 @@ class FunctionArgumentsGenerator:
     def __init__(
         self,
         prompt_generator: PromptGenerator,
-        user_prompt: str,
-        prompt_id: int,
+        user_prompt: PromptModel,
         function_definition: FunctionDefinitionModel,
         model: Model,
         function_parameters_predictor: FunctionParametersPredictor,
@@ -31,14 +31,13 @@ class FunctionArgumentsGenerator:
         self.__text_ids: list[int] = list()
         self.__model: Model = model
         self.__function_arguments: Argument = dict()
-        self.__user_prompt: str = user_prompt
+        self.__user_prompt: PromptModel = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
         self.__cache: Cache = Cache()
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             function_parameters_predictor
         )
         self.__generated_tokens: str = str()
-        self.__prompt_id: int = prompt_id
         self.__log: Log = log
 
     def generate(self) -> None:
@@ -137,7 +136,7 @@ class FunctionArgumentsGenerator:
             )
             if current_state == StringState.FINAL or (
                 current_state == StringState.CONTENT
-                and len(self.__generated_tokens) >= len(self.__user_prompt)
+                and len(self.__generated_tokens) >= len(self.__user_prompt.prompt)
             ):
                 if '"' in self.__generated_tokens:
                     double_quotes_ids: int = self.__generated_tokens.rindex('"')
@@ -160,7 +159,7 @@ class FunctionArgumentsGenerator:
         self.__text_ids = self.__cache.function_arguments_static_prompt_ids
         dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(
             self.__function_definition,
-            self.__user_prompt,
+            self.__user_prompt.prompt,
             self.__function_arguments,
             arg_name,
             arg_type,
@@ -181,11 +180,11 @@ class FunctionArgumentsGenerator:
     ) -> None:
         self.__log.add_row(
             row=LogRow(
-                id=self.__prompt_id,
-                prompt=self.__user_prompt,
+                id=self.__user_prompt.id,
+                prompt=self.__user_prompt.prompt,
                 function_defintion=self.__function_definition.model_dump_json(indent=4),
                 function_call=self.__prompt_generator.function_call_prompt(
-                    self.__user_prompt,
+                    self.__user_prompt.prompt,
                     self.__function_definition,
                     self.__function_arguments,
                     arg_name,
@@ -193,7 +192,7 @@ class FunctionArgumentsGenerator:
                 )
                 + self.__generated_tokens,
             ),
-            status=f"{self.__prompt_id}-Generating argument {arg_name}",
+            status=f"{self.__user_prompt.id}-Generating argument {arg_name}",
         )
 
     @property

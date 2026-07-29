@@ -1,7 +1,6 @@
 from enum import Enum
 
-from src.models.prompt_model import PromptModel
-from src.models.function_definition_model import FunctionDefinitionModel
+from src.models import PromptModel, FunctionDefinitionModel
 from typing_extensions import Self
 from collections.abc import Generator
 
@@ -158,9 +157,9 @@ class PromptGenerator:
             builder.function_argument_static_prompt
         )
 
-    def iter_prompts(self) -> Generator[str]:
+    def iter_prompts(self) -> Generator[PromptModel]:
         for prompt in self.prompts:
-            yield prompt.prompt
+            yield prompt
 
     def function_name_dynamic_prompt(self, prompt: str) -> str:
         return PromptGenerator.PromptType.FUNCTION_NAME_DYNAMIC.value.replace(

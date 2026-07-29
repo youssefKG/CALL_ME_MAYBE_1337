@@ -1,6 +1,6 @@
-from src.predictors.fn_name_predictor import FunctionNamePredictor
+from src.predictors import FunctionNamePredictor
 from src.llm.model import Model
-from src.prompts.prompt_generator import PromptGenerator
+from src.prompts import PromptGenerator
 from src.cache.cache import Cache
 import numpy as np
 

@@ -1,4 +1,3 @@
-from nt import write
 import os
 
 

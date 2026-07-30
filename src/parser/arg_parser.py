@@ -2,6 +2,7 @@ from enum import Enum
 from pathlib import Path
 from typing import cast
 from src.utils.file_checker import FileChecker
+import os
 
 
 class ArgsError(Exception):
@@ -11,7 +12,7 @@ class ArgsError(Exception):
 class DefaultFilePath(str, Enum):
     PROMPT_PATH = "data/input/function_calling_tests.json"
     FUNCTION_DEFINITION_PATH = "data/input/functions_definition.json"
-    FUNCTION_CALL_PATH = "data/input/data/output/function_calls.json"
+    FUNCTION_CALL_PATH = "data/input/output/function_calls.json"
 
 
 class ArgsParser:
@@ -51,11 +52,11 @@ class ArgsParser:
     ) -> None:
         if self.__functions_definition_file is not None:
             self.__raise_duplicated_option("--functions_definition")
-        if file_path is None:
-            self.__raise_missing_value_after_option("--input")
-            return
-        FileChecker.check_file_path_is_exist(file_path)
-        FileChecker.check_file_is_readable(file_path)
+        self.__functions_definition_file = file_path
+        FileChecker.check_file_path_is_exist(
+            cast(str, self.__functions_definition_file)
+        )
+        FileChecker.check_file_is_readable(cast(str, self.__functions_definition_file))
         self.__functions_definition_file = file_path
 
     def __set_output_file(
@@ -63,7 +64,12 @@ class ArgsParser:
     ) -> None:
         if self.__output_file is None:
             self.__output_file = file_path
+            is_exist: bool = os.access(cast(str, self.__output_file), os.F_OK)
+            if is_exist and self.__output_file is not None:
+                FileChecker.check_file_is_readable(self.__output_file)
+                FileChecker.check_file_is_writable(self.__output_file)
             output_file_path: Path = Path(cast(str, self.__output_file))
+            output_file_path.parent.mkdir(exist_ok=True, parents=True)
             output_file_path.touch(exist_ok=True)
         else:
             self.__raise_duplicated_option("output")
@@ -85,7 +91,7 @@ class ArgsParser:
         if self.__output_file is None:
             self.__set_output_file()
         if self.__functions_definition_file is None:
-            self.__raise_missing_functions_definition_file()
+            self.__set_functions_definition_file()
 
     def __set_model_name(self, model_name: str | None) -> None:
         if model_name:

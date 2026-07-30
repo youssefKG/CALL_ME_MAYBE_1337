@@ -1,11 +1,10 @@
-from typing_extensions import Self
+# from typing_extensions import Self
 
-from collections import defaultdict
-from typing_extensions import override
+# from collections import defaultdict
 
-def_dict: defaultdict[str, None | str] = defaultdict(lambda: None)
-a = def_dict["name"]
-print(a)
+# def_dict: defaultdict[str, None | str] = defaultdict(lambda: None)
+# a = def_dict["name"]
+# print(a)
 
 # class A(str, Enum):
 #     DEFAULT = "default"
@@ -44,20 +43,20 @@ print(a)
 #         print("youssef", details)
 #     case _:
 #         pass
-class A:
-    def __init__(self, name: str) -> None:
-        self.name: str = name
+# class A:
+# def __init__(self, name: str) -> None:
+# self.name: str = name
 
-    # @override
-    # def __eq__(self, value: object) -> bool:
-    #     if id(self) == id(value):
-    #         return True
-    #     else:
-    #         return False
+# @override
+# def __eq__(self, value: object) -> bool:
+#     if id(self) == id(value):
+#         return True
+#     else:
+#         return False
 
-    @override
-    def __hash__(self) -> int:
-        return id(self.name)
+# @override
+# def __hash__(self) -> int:
+#    return id(self.name)
 
 
 # c = A("amine")
@@ -69,3 +68,7 @@ class A:
 # c = True
 # d = False
 # print(id(c), id(b))
+
+# UNPACKING
+
+print(dir(range(4)))

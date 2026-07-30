@@ -7,8 +7,8 @@ class FileError(Exception):
 
 class FileChecker:
 
-    @classmethod
-    def check_file_is_readable(cls, file_path: str) -> None:
+    @staticmethod
+    def check_file_is_readable(file_path: str) -> None:
         is_readable: bool = os.access(file_path, os.R_OK)
         if not is_readable:
             raise FileError(
@@ -17,8 +17,8 @@ class FileChecker:
                 + "have sufficient permissions to read it."
             )
 
-    @classmethod
-    def check_file_path_is_exist(cls, file_path: str) -> None:
+    @staticmethod
+    def check_file_path_is_exist(file_path: str) -> None:
         is_exist: bool = os.access(file_path, os.F_OK)
         if not is_exist:
             raise FileError(
@@ -26,7 +26,8 @@ class FileChecker:
                 + "provide a valid path to an existing configuration file."
             )
 
-    def check_file_is_writable(self, file_path: str) -> None:
+    @staticmethod
+    def check_file_is_writable(file_path: str) -> None:
         is_writable: bool = os.access(file_path, os.W_OK)
         if not is_writable:
             raise FileError(

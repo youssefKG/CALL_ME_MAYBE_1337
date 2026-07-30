@@ -1,12 +1,13 @@
 from pathlib import Path
+
+from pydantic import ValidationError
 from src.models.function_definition_model import (
     FunctionsDefinitionRootModel,
     FunctionDefinitionModel,
 )
 from .arg_parser import ArgsParser
 from src.models.prompt_model import PromptModel, PromptsRootModel
-from typing import cast
-import json
+import sys
 
 
 class Parser:
@@ -26,10 +27,19 @@ class Parser:
         functions_definition_file_content: str = Path(
             self.__args_parser.get_functions_definition_file
         ).read_text()
-        function_definions_validator = FunctionsDefinitionRootModel.model_validate_json(
-            functions_definition_file_content
-        )
-        self.__function_defintions = function_definions_validator.root
+        try:
+            function_definions_validator = (
+                FunctionsDefinitionRootModel.model_validate_json(
+                    functions_definition_file_content
+                )
+            )
+            self.__function_defintions = function_definions_validator.root
+        except ValidationError as error:
+            print(
+                f"Validation Error({self.__args_parser.get_functions_definition_file}):\n",
+                f"{error.errors()[0]['msg']}",
+            )
+            sys.exit(1)
 
     def __parse_model_name(self) -> None:
         self.__model_name = self.__args_parser.model_name
@@ -38,10 +48,15 @@ class Parser:
         input_file_content: str = Path(
             self.__args_parser.get_input_file
         ).read_text()  # read the content
-        prompts_validator = PromptsRootModel.model_validate(
-            cast(str, json.loads(input_file_content))
-        )  # validate the
-        self.__prompts = prompts_validator.root
+        try:
+            prompts_validator = PromptsRootModel.model_validate_json(input_file_content)
+            self.__prompts = prompts_validator.root
+        except ValidationError as error:
+            print(
+                f"Validation Error({self.__args_parser.get_input_file}):\n",
+                f"{error.errors()[0]['msg']}",
+            )
+            sys.exit(1)
 
     @property
     def prompts(self) -> list[PromptModel]:

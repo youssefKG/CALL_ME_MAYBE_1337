@@ -50,8 +50,6 @@ class FunctionNamePredictor:
 
     def get_next_predictions_ids(self, ids: list[int]) -> list[int]:
         next_possible_tokens: list[int] = self.__fns_names_ids_trie.get_children(ids)
-        next_possible_tokens.append(self.__cache.get_token_id(","))
-        next_possible_tokens.append(self.__cache.get_token_id('"'))
         return next_possible_tokens
 
     def is_completed(self, ids: list[int]) -> bool:

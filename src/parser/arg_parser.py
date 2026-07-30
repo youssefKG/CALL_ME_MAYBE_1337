@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import cast
 from src.utils.file_checker import FileChecker
 
@@ -8,8 +9,9 @@ class ArgsError(Exception):
 
 
 class DefaultFilePath(str, Enum):
-    INPUT_FILE = "data/input/function_calling_tests.json"
-    FUNCTION_DEFINTION_FILE = "data/input/functions_definition.json"
+    PROMPT_PATH = "data/input/function_calling_tests.json"
+    FUNCTION_DEFINITION_PATH = "data/input/functions_definition.json"
+    FUNCTION_CALL_PATH = "data/input/data/output/function_calls.json"
 
 
 class ArgsParser:
@@ -45,7 +47,7 @@ class ArgsParser:
                 self.__raise_unknown_option(option)
 
     def __set_functions_definition_file(
-        self, file_path: str | None = DefaultFilePath.FUNCTION_DEFINTION_FILE
+        self, file_path: str | None = DefaultFilePath.FUNCTION_DEFINITION_PATH.value
     ) -> None:
         if self.__functions_definition_file is not None:
             self.__raise_duplicated_option("--functions_definition")
@@ -56,17 +58,18 @@ class ArgsParser:
         FileChecker.check_file_is_readable(file_path)
         self.__functions_definition_file = file_path
 
-    def __set_output_file(self, file_path: str | None = None) -> None:
-        if self.__output_file is not None:
+    def __set_output_file(
+        self, file_path: str | None = DefaultFilePath.FUNCTION_CALL_PATH.value
+    ) -> None:
+        if self.__output_file is None:
+            self.__output_file = file_path
+            output_file_path: Path = Path(cast(str, self.__output_file))
+            output_file_path.touch(exist_ok=True)
+        else:
             self.__raise_duplicated_option("output")
-        if file_path is None:
-            return self.__raise_missing_value_after_option("--output")
-        # FileChecker.check_file_is_writable(file_path)
-        FileChecker.check_file_is_readable(file_path)
-        self.__output_file = file_path
 
     def __set_input_file(
-        self, file_path: str | None = DefaultFilePath.INPUT_FILE.value
+        self, file_path: str | None = DefaultFilePath.PROMPT_PATH.value
     ) -> None:
         if self.__input_file_file is not None:
             self.__raise_duplicated_option("--input")

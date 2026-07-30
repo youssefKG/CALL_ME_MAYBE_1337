@@ -1,3 +1,5 @@
+"""Parse CLI arguments, prompts, and function definitions for the generation pipeline."""
+
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -11,6 +13,8 @@ import sys
 
 
 class Parser:
+    """Validate and expose configuration parsed from the CLI and input files."""
+
     def __init__(self, args: list[str]) -> None:
         self.__args_parser: ArgsParser = ArgsParser(args)
         self.__prompts: list[PromptModel]
@@ -18,12 +22,22 @@ class Parser:
         self.__model_name: str
 
     def parse(self) -> None:
+        """Parse arguments, prompts, and function definitions.
+
+        Returns:
+            None
+        """
         self.__args_parser.parse()
         self.__parse_prompts()
         self.__parse_functions_definition()
         self.__parse_model_name()
 
     def __parse_functions_definition(self) -> None:
+        """Load and validate the JSON file that defines available functions.
+
+        Returns:
+            None
+        """
         functions_definition_file_content: str = Path(
             self.__args_parser.get_functions_definition_file
         ).read_text()
@@ -42,9 +56,19 @@ class Parser:
             sys.exit(1)
 
     def __parse_model_name(self) -> None:
+        """Store the model name selected from the CLI arguments.
+
+        Returns:
+            None
+        """
         self.__model_name = self.__args_parser.model_name
 
     def __parse_prompts(self) -> None:
+        """Load and validate the prompt dataset from the input JSON file.
+
+        Returns:
+            None
+        """
         input_file_content: str = Path(
             self.__args_parser.get_input_file
         ).read_text()  # read the content
@@ -60,10 +84,20 @@ class Parser:
 
     @property
     def prompts(self) -> list[PromptModel]:
+        """Get the validated prompt objects.
+
+        Returns:
+            list[PromptModel]: Parsed prompts for generation.
+        """
         return self.__prompts
 
     @property
     def functions_definition(self) -> list[FunctionDefinitionModel]:
+        """Get the validated function definitions.
+
+        Returns:
+            list[FunctionDefinitionModel]: Available functions for the run.
+        """
         return self.__function_defintions
 
     def fns_def_names(self) -> set[str]:
@@ -72,8 +106,18 @@ class Parser:
 
     @property
     def output_path(self) -> str:
+        """Get the output path for the generated function-call JSON.
+
+        Returns:
+            str: Path to the output file.
+        """
         return self.__args_parser.get_output_file
 
     @property
     def model_name(self) -> str:
+        """Get the configured model name.
+
+        Returns:
+            str: Name of the language model to use.
+        """
         return self.__model_name

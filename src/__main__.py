@@ -1,3 +1,5 @@
+"""Entry point for the constrained function-calling pipeline."""
+
 from src.error_recovery.error_recovery import ErrorRecovery
 from src.parser import Parser
 from src.llm.model import Model
@@ -10,9 +12,13 @@ import sys
 
 
 def main() -> None:
+    """Run the full pipeline from input parsing to JSON output generation.
+
+    Returns:
+        None
+    """
     parser: Parser = Parser(sys.argv)
     parser.parse()
-    model: Model = Model(parser.model_name)
     log: Log = Log()
     log.init_prompts(parser.prompts)
     prompt_generator: PromptGenerator = (
@@ -23,7 +29,15 @@ def main() -> None:
         .set_prompts(parser.prompts)
         .build()
     )
-    (
+    error_recovery: ErrorRecovery = ErrorRecovery(
+        log=log,
+        output_path=parser.output_path,
+        function_definitions=parser.functions_definition,
+        prompts=parser.prompts,
+    )
+    error_recovery.recover()
+    model: Model = Model(parser.model_name)
+    cache: Cache = (
         Cache.Builder()
         .set_model(model)
         .set_function_name_static_prompt(prompt_generator.function_name_static_prompt)
@@ -33,13 +47,6 @@ def main() -> None:
         )
         .build()
     )
-    error_recovery: ErrorRecovery = ErrorRecovery(
-        log=log,
-        output_path=parser.output_path,
-        function_definitions=parser.functions_definition,
-        prompts=parser.prompts,
-    )
-    error_recovery.recover()
     output_generator: OutputGenerator = OutputGenerator(
         model,
         log=log,
@@ -48,6 +55,7 @@ def main() -> None:
         functions_definitions=parser.functions_definition,
         prompt_generator=prompt_generator,
         output_path=parser.output_path,
+        cache=cache,
     )
     output_generator.generate()
 

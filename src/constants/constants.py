@@ -1,3 +1,5 @@
+"""Shared token and prompt constants used by the constrained decoder."""
+
 ESCAPE_SEQUENCES: list[str] = [
     "\\",
     "'",

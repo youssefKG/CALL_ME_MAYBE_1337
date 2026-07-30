@@ -1,3 +1,5 @@
+"""Recover from invalid or incomplete generated outputs during a run."""
+
 from pydantic import ValidationError
 
 from src.log.log import Log, LogRow
@@ -10,6 +12,8 @@ from pathlib import Path
 
 
 class ErrorRecovery:
+    """Validate previous outputs and continue generation only for unfinished prompts."""
+
     def __init__(
         self,
         *,
@@ -30,6 +34,11 @@ class ErrorRecovery:
         self.__init_log()
 
     def recover(self) -> None:
+        """Restore valid prior output or reset the run when the persisted state is invalid.
+
+        Returns:
+            None
+        """
         function_defintion: FunctionDefinitionModel | None = None
         try:
             self.__set_generated_functions_call()
@@ -62,6 +71,7 @@ class ErrorRecovery:
         self.__remaining_prompts = self.__prompts[idx:]
 
     def __set_generated_functions_call(self) -> None:
+        """Load previously generated function calls from the output JSON file."""
         functions_call_content: str = Path(self.__output_path).read_text()
         self.__generated_functions_call = FunctionCallRootModel.model_validate_json(
             functions_call_content
@@ -104,23 +114,36 @@ class ErrorRecovery:
         return True
 
     def __set_default(self) -> None:
+        """Reset the recovery state so generation starts from the beginning."""
         self.__generated_functions_call = list()
         self.__remaining_prompts = self.__prompts
 
     @property
     def remaining_prompts(self) -> list[PromptModel]:
+        """Get prompts that still need generation.
+
+        Returns:
+            list[PromptModel]: Remaining prompts to process.
+        """
         return self.__remaining_prompts
 
     @property
     def generated_functions_calls(self) -> list[FunctionCallModel]:
+        """Get the recovered or newly generated function-call objects.
+
+        Returns:
+            list[FunctionCallModel]: Function calls available for continuation.
+        """
         return self.__generated_functions_call
 
     def __init_log(self) -> None:
+        """Initialize log rows for each prompt before generation begins."""
         self.__log.add_rows(
             [LogRow(prompt.id, prompt.prompt) for prompt in self.__prompts]
         )
 
     def __log_generated_function_calls(self) -> None:
+        """Log the recovered function calls for the current prompt batch."""
         for prompt, function_call in zip(
             self.__prompts, self.__generated_functions_call
         ):

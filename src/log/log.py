@@ -1,4 +1,5 @@
-from numpy.random import f
+"""Utilities for displaying generation progress in the console."""
+
 from rich.console import Console
 from rich.table import Table
 from src.models.prompt_model import PromptModel
@@ -8,6 +9,7 @@ import os
 
 
 class LogRow:
+    """Represents one row of progress information in the live log."""
     def __init__(
         self,
         id: str,
@@ -22,11 +24,13 @@ class LogRow:
 
 
 class Log:
+    """Render a live table of prompt progress and generated function calls."""
     def __init__(self) -> None:
         self.__console: Console = Console()
         self.__rows: dict[str, LogRow] = dict()
 
     def __update(self) -> None:
+        """Refresh the console table with the latest rows."""
         os.system("cls" if os.name == "nt" else "clear")
         table: Table = Table(title="CALL_ME_BABY", show_lines=True)
         table.add_column("Id", no_wrap=False, width=30)
@@ -44,15 +48,31 @@ class Log:
         sys.stdout.flush()
 
     def add_row(self, row: LogRow, status: str = "") -> None:
+        """Add or update a log row and print the latest state.
+
+        Args:
+            row: Row data to store.
+            status: Optional status message to print below the table.
+        """
         self.__rows[row.id] = row
         self.__update()
         self.__console.print(status)
 
     def add_rows(self, rows: list[LogRow]) -> None:
+        """Add several rows to the log in one pass.
+
+        Args:
+            rows: Rows to initialize in the log.
+        """
         for row in rows:
             self.__rows[row.id] = row
         self.__update()
 
     def init_prompts(self, prompts: list[PromptModel]) -> None:
+        """Seed the log with one row per prompt before generation starts.
+
+        Args:
+            prompts: Prompt objects to initialize.
+        """
         for prompt in prompts:
             self.__rows[prompt.id] = LogRow(prompt.id, prompt.prompt)

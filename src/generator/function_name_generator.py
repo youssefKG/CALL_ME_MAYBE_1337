@@ -9,6 +9,9 @@ class FunctionNameGenerator:
     def __init__(
         self,
         model: Model,
+        /,
+        *,
+        cache: Cache,
         function_name_predictor: FunctionNamePredictor,
         prompt_generator: PromptGenerator,
         prompt: str,
@@ -16,7 +19,7 @@ class FunctionNameGenerator:
         self.__model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__function_name_predictor: FunctionNamePredictor = function_name_predictor
-        self.__cache: Cache = Cache()
+        self.__cache: Cache = cache
         self.__text_ids: list[int] = list()
         self.__generated_ids: list[int] = list()
         self.__function_name_tokens: list[str] = list()

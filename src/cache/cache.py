@@ -1,26 +1,47 @@
+"""Cache token IDs and static prompt IDs for repeated decoding steps."""
+
 from typing_extensions import Self
 from src.llm.model import Model
 import src.constants.constants as constants
 
 
 class Cache:
+    """Singleton cache for token IDs and prompt prefixes used during generation."""
+
     __instance: Self | None = None
 
     class Builder:
+        """Fluent builder for populating the cache with model-dependent values."""
+
         def __init__(self) -> None:
             self.__model: Model
             self.__tokens_ids: dict[str, int] = dict()
             self.__function_name_static_prompt_ids: list[int]
             self.__function_arguments_static_prompt_ids: list[int]
 
-        def build(self) -> None:
-            Cache(self)
+        def build(self) -> "Cache":
+            """Create the singleton cache instance from the builder state.
+
+            Returns:
+                None
+            """
+            return Cache(self)
 
         def set_model(self, model: Model) -> Self:
+            """Store the model used to compute token IDs.
+
+            Args:
+                model: Model instance used for tokenization.
+
+            Returns:
+                Self: The builder instance.
+            """
             self.__model = model
             return self
 
         def set_tokens_ids(self) -> Self:
+            """Populate the cache with the token IDs for common decoding symbols."""
+
             def __encode_list(lst: list[str]) -> None:
                 for ch in lst:
                     ch_id: int = self.__model.encode_text(ch)[0]
@@ -33,10 +54,26 @@ class Cache:
             return self
 
         def set_function_name_static_prompt(self, prompt: str) -> Self:
+            """Store the function-name static prompt token IDs.
+
+            Args:
+                prompt: Static function-name prompt text.
+
+            Returns:
+                Self: The builder instance.
+            """
             self.__function_name_static_prompt_ids = self.__model.encode_text(prompt)
             return self
 
         def set_function_argument_static_prompt(self, prompt: str) -> Self:
+            """Store the function-argument static prompt token IDs.
+
+            Args:
+                prompt: Static argument-generation prompt text.
+
+            Returns:
+                Self: The builder instance.
+            """
             self.__function_arguments_static_prompt_ids = self.__model.encode_text(
                 prompt
             )
@@ -55,11 +92,13 @@ class Cache:
             return self.__tokens_ids.copy()
 
     def __new__(cls, builder: Builder | None = None) -> Self:
+        """Create or return the singleton cache instance."""
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
         return cls.__instance
 
     def __init__(self, builder: Builder | None = None) -> None:
+        """Initialize the cache from a builder when it is first populated."""
         if builder:
             self.__function_name_static_prompt_ids: list[int] = (
                 builder.function_name_static_prompt_ids
@@ -71,11 +110,21 @@ class Cache:
 
     @property
     def function_name_static_prompt_ids(self) -> list[int]:
+        """Get a copy of the cached static prompt token IDs."""
         return self.__function_name_static_prompt_ids.copy()
 
     @property
     def function_arguments_static_prompt_ids(self) -> list[int]:
+        """Get a copy of the cached argument-prompt token IDs."""
         return self.__function_arguments_static_prompt_ids.copy()
 
     def get_token_id(self, token: str) -> int:
+        """Retrieve the cached token ID for a single token string.
+
+        Args:
+            token: Token to resolve.
+
+        Returns:
+            int: Cached token identifier.
+        """
         return self.__tokens_ids[token]

@@ -20,10 +20,13 @@ class FunctionArgumentsGenerator:
 
     def __init__(
         self,
+        model: Model,
+        /,
+        *,
+        cache: Cache,
         prompt_generator: PromptGenerator,
         user_prompt: PromptModel,
         function_definition: FunctionDefinitionModel,
-        model: Model,
         function_parameters_predictor: FunctionParametersPredictor,
         log: Log,
     ) -> None:
@@ -33,7 +36,7 @@ class FunctionArgumentsGenerator:
         self.__function_arguments: Argument = dict()
         self.__user_prompt: PromptModel = user_prompt
         self.__function_definition: FunctionDefinitionModel = function_definition
-        self.__cache: Cache = Cache()
+        self.__cache: Cache = cache
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             function_parameters_predictor
         )

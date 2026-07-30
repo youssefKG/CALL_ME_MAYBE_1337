@@ -71,8 +71,8 @@
         "prompt": "Replace all vowels in 'Programming is fun' with asterisks",
         "parameters": {
             "source_string": "Programming is fun",
-            "regex": "aeiou",
-            "replacement": "asterisk"
+            "regex": "aeiouAEIOU",
+            "replacement": "asterisks"
         }
     },
     {

@@ -14,6 +14,14 @@ class Cache:
         """Fluent builder for populating the cache with model-dependent values."""
 
         def __init__(self) -> None:
+            """Initialize the builder with empty state.
+
+            Attributes:
+                __model: Language model for tokenization.
+                __tokens_ids: Mapping of token strings to token IDs.
+                __fn_name_prompt_ids: Encoded function-name prompt.
+                __arg_prompt_ids: Encoded argument prompt.
+            """
             self.__model: Model
             self.__tokens_ids: dict[str, int] = dict()
             self.__function_name_static_prompt_ids: list[int]
@@ -23,7 +31,7 @@ class Cache:
             """Create the singleton cache instance from the builder state.
 
             Returns:
-                None
+                Cache: The singleton cache instance populated with values.
             """
             return Cache(self)
 
@@ -40,9 +48,21 @@ class Cache:
             return self
 
         def set_tokens_ids(self) -> Self:
-            """Populate the cache with the token IDs for common decoding symbols."""
+            """Populate the cache with token IDs for decoding symbols.
+
+            Encodes all escape sequences, numbers, chat templates, and
+            boolean literals using the model tokenizer.
+
+            Returns:
+                Self: The builder instance for method chaining.
+            """
 
             def __encode_list(lst: list[str]) -> None:
+                """Encode a list of strings and store their token IDs.
+
+                Args:
+                    lst: List of strings to tokenize.
+                """
                 for ch in lst:
                     ch_id: int = self.__model.encode_text(ch)[0]
                     self.__tokens_ids[ch] = ch_id
@@ -56,43 +76,74 @@ class Cache:
         def set_function_name_static_prompt(self, prompt: str) -> Self:
             """Store the function-name static prompt token IDs.
 
+            Encodes the static prompt used for function-name generation
+            and caches the resulting token sequence.
+
             Args:
                 prompt: Static function-name prompt text.
 
             Returns:
-                Self: The builder instance.
+                Self: The builder instance for method chaining.
             """
-            self.__function_name_static_prompt_ids = self.__model.encode_text(prompt)
+            prompt_ids = self.__model.encode_text(prompt)
+            self.__function_name_static_prompt_ids = prompt_ids
             return self
 
         def set_function_argument_static_prompt(self, prompt: str) -> Self:
             """Store the function-argument static prompt token IDs.
 
+            Encodes the static prompt used for argument generation and
+            caches the resulting token sequence.
+
             Args:
                 prompt: Static argument-generation prompt text.
 
             Returns:
-                Self: The builder instance.
+                Self: The builder instance for method chaining.
             """
-            self.__function_arguments_static_prompt_ids = self.__model.encode_text(
-                prompt
-            )
+            prompt_ids = self.__model.encode_text(prompt)
+            self.__function_arguments_static_prompt_ids = prompt_ids
             return self
 
         @property
         def function_arguments_static_prompt_ids(self) -> list[int]:
+            """Get a copy of the function-argument prompt token IDs.
+
+            Returns:
+                list[int]: Argument prompt token IDs.
+            """
             return self.__function_arguments_static_prompt_ids.copy()
 
         @property
         def function_name_static_prompt_ids(self) -> list[int]:
+            """Get a copy of the function-name prompt token IDs.
+
+            Returns:
+                list[int]: Function-name prompt token IDs.
+            """
             return self.__function_name_static_prompt_ids.copy()
 
         @property
         def tokens_ids(self) -> dict[str, int]:
+            """Get a copy of the cached token ID mapping.
+
+            Returns:
+                dict[str, int]: Token string to token ID mapping.
+            """
             return self.__tokens_ids.copy()
 
     def __new__(cls, builder: Builder | None = None) -> Self:
-        """Create or return the singleton cache instance."""
+        """Create or return the singleton cache instance.
+
+        Implements the singleton pattern to ensure only one cache instance
+        exists per process.
+
+        Args:
+            builder: Optional builder instance for initialization.
+
+        Returns:
+            Self: The singleton cache instance.
+        """
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
         return cls.__instance

@@ -1,3 +1,5 @@
+"""Predictors for constraining names and arguments during generation."""
+
 from .function_name_predictor import FunctionNamePredictor
 
 from .function_parameters_predictor import (

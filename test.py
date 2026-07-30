@@ -1,6 +1,7 @@
 # from typing_extensions import Self
 
 # from collections import defaultdict
+from typing import TypeVar, Generic
 
 # def_dict: defaultdict[str, None | str] = defaultdict(lambda: None)
 # a = def_dict["name"]
@@ -69,6 +70,20 @@
 # d = False
 # print(id(c), id(b))
 
+
 # UNPACKING
 
-print(dir(range(4)))
+T = TypeVar("T")
+
+
+class Number(Generic[T]):
+    def __init__(self, lst: list[T]):
+        self.lst: list[T] = lst
+
+    def log(self) -> None:
+        for item in self.lst:
+            print(item)
+
+
+a = Number[int]([1, 3, 4, 0.2])
+a.log()

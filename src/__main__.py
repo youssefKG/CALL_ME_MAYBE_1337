@@ -29,6 +29,7 @@ def main() -> None:
         .set_prompts(parser.prompts)
         .build()
     )
+    model: Model = Model(parser.model_name)
     error_recovery: ErrorRecovery = ErrorRecovery(
         log=log,
         output_path=parser.output_path,
@@ -36,7 +37,6 @@ def main() -> None:
         prompts=parser.prompts,
     )
     error_recovery.recover()
-    model: Model = Model(parser.model_name)
     cache: Cache = (
         Cache.Builder()
         .set_model(model)

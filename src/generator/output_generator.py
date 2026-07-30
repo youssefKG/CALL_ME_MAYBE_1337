@@ -19,7 +19,11 @@ from src.cache import Cache
 
 
 class OutputGenerator:
-    """Generate function calls and persist them to disk as JSON."""
+    """Generate function calls for prompts and persist them to an output file.
+
+    Coordinates function-name and argument generation for each remaining
+    prompt and stores the generated function calls.
+    """
 
     def __init__(
         self,
@@ -34,6 +38,21 @@ class OutputGenerator:
         output_path: str,
         cache: Cache,
     ) -> None:
+        """Initialize the output generator.
+
+        Args:
+            model: Language model used for function generation.
+            log: Logger used to record the generation process.
+            remaining_prompts: Prompts that still need to be processed.
+            generated_functions_call: List used to store generated function calls.
+            functions_definitions: Available function definitions.
+            prompt_generator: Generator used to create model prompts.
+            output_path: Path to the output JSON file.
+            cache: Cache used by the function predictors and generators.
+
+        Returns:
+            None.
+        """
         self.__functions_definitions: list[FunctionDefinitionModel] = (
             functions_definitions
         )
@@ -51,10 +70,10 @@ class OutputGenerator:
         self.__init_functions_name_predictor()
 
     def generate(self) -> None:
-        """Generate outputs for all remaining prompts.
+        """Generate function calls for all remaining prompts.
 
         Returns:
-            None
+            None.
         """
         for prompt in self.__iter_prompts():
             self.__log.add_row(
@@ -82,13 +101,13 @@ class OutputGenerator:
             self.__generate_output_file()
 
     def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
-        """Infer the best matching function definition for a prompt.
+        """Find the function definition matching a user prompt.
 
         Args:
-            prompt: User prompt to resolve.
+            prompt: User prompt used to select a function.
 
         Returns:
-            FunctionDefinitionModel | None: Matching function schema if one is found.
+            The matching function definition, or None if no match is found.
         """
 
         def __get_function_definition(
@@ -112,6 +131,15 @@ class OutputGenerator:
     def __function_arguments(
         self, function_definition: FunctionDefinitionModel, prompt: PromptModel
     ) -> Argument:
+        """Generate arguments for a function definition.
+
+        Args:
+            function_definition: Function definition whose arguments are generated.
+            prompt: User prompt used for argument generation.
+
+        Returns:
+            A dictionary containing the generated function arguments.
+        """
         function_argument_generator = FunctionArgumentsGenerator(
             self.__model,
             cache=self.__cache,
@@ -125,7 +153,11 @@ class OutputGenerator:
         return function_argument_generator.function_arguments
 
     def __init_functions_name_predictor(self) -> None:
-        """Initialize the trie used to constrain function-name generation."""
+        """Initialize the predictor used for function-name generation.
+
+        Returns:
+            None.
+        """
         self.__function_name_predictor = FunctionNamePredictor()
         fns_def_names_ids: list[list[int]] = list()
         for fn_def in self.__functions_definitions:
@@ -134,15 +166,19 @@ class OutputGenerator:
 
     @property
     def functions_calls(self) -> list[FunctionCallModel]:
-        """Get the generated function-call objects.
+        """Return the generated function calls.
 
         Returns:
-            list[FunctionCallModel]: Generated function calls.
+            A list containing the generated function-call objects.
         """
         return self.__functions_calls
 
     def __generate_output_file(self) -> None:
-        """Write the current function-call batch to the configured output file."""
+        """Write the generated function calls to the output JSON file.
+
+        Returns:
+            None.
+        """
         try:
             with open(self.__output_path, "w") as output_file:
                 functions_calls_json: str = FunctionCallRootModel(
@@ -153,10 +189,10 @@ class OutputGenerator:
             pass
 
     def __iter_prompts(self) -> Generator[PromptModel]:
-        """Yield remaining prompts to process.
+        """Iterate over the remaining prompts.
 
         Yields:
-            PromptModel: The next prompt in the queue.
+            The next prompt to be processed.
         """
         for prompt in self.__remaining_prompts:
             yield prompt

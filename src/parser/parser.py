@@ -13,9 +13,25 @@ import sys
 
 
 class Parser:
-    """Validate and expose configuration parsed from the CLI and input files."""
+    """Validate and expose configuration parsed from the CLI and input files.
+
+    Orchestrates parsing of command-line arguments, input prompts, and
+    function definitions. Validates JSON inputs and makes parsed data
+    available via properties.
+
+    Attributes:
+        __args_parser: CLI argument parser.
+        __prompts: Loaded prompt objects.
+        __function_defintions: Loaded function definitions.
+        __model_name: Selected model identifier.
+    """
 
     def __init__(self, args: list[str]) -> None:
+        """Initialize parser with CLI arguments.
+
+        Args:
+            args: Command-line arguments including program name.
+        """
         self.__args_parser: ArgsParser = ArgsParser(args)
         self.__prompts: list[PromptModel]
         self.__function_defintions: list[FunctionDefinitionModel]
@@ -23,6 +39,10 @@ class Parser:
 
     def parse(self) -> None:
         """Parse arguments, prompts, and function definitions.
+
+        Orchestrates the complete parsing pipeline: processes CLI args,
+        loads and validates prompt and function-definition JSON files,
+        and extracts the model name.
 
         Returns:
             None
@@ -34,6 +54,10 @@ class Parser:
 
     def __parse_functions_definition(self) -> None:
         """Load and validate the JSON file that defines available functions.
+
+        Reads the function-definition JSON file, parses it using Pydantic,
+        and stores the resulting function definitions. Exits on validation
+        error.
 
         Returns:
             None
@@ -58,6 +82,9 @@ class Parser:
     def __parse_model_name(self) -> None:
         """Store the model name selected from the CLI arguments.
 
+        Extracts the model name from the parsed CLI arguments and stores
+        it for later access.
+
         Returns:
             None
         """
@@ -66,6 +93,9 @@ class Parser:
     def __parse_prompts(self) -> None:
         """Load and validate the prompt dataset from the input JSON file.
 
+        Reads the prompt JSON file, parses it using Pydantic, and stores
+        the resulting prompt objects. Exits on validation error.
+
         Returns:
             None
         """
@@ -73,7 +103,9 @@ class Parser:
             self.__args_parser.get_input_file
         ).read_text()  # read the content
         try:
-            prompts_validator = PromptsRootModel.model_validate_json(input_file_content)
+            prompts_validator = PromptsRootModel.model_validate_json(
+                input_file_content
+            )
             self.__prompts = prompts_validator.root
         except ValidationError as error:
             print(

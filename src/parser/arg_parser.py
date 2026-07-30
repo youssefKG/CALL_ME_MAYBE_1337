@@ -201,10 +201,6 @@ class ArgsParser:
             + f" Expected a directory path after '{option}."
         )  # raise missing value after otpion
 
-    def __raise_missing_functions_definition_file(self) -> None:
-        """Raise an error when the function-definition file is missing."""
-        raise ArgsError("Error: missing functions definition file from args")
-
     def __raise_duplicated_option(self, option: str) -> None:
         """Raise an error when a CLI option is supplied more than once.
 

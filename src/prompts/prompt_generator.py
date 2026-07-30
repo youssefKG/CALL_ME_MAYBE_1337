@@ -10,7 +10,11 @@ import json
 
 
 class PromptType(str, Enum):
-    """Enumerates the prompt templates used by the generation pipeline."""
+    """Define the prompt templates used by the generation pipeline.
+
+    Each template is used for a specific stage of function-call generation.
+    """
+
     FUNCTIONS_NAME_STATIC = """
     Instructions:
     - Read the available function definitions.
@@ -91,13 +95,23 @@ class PromptType(str, Enum):
 
 
 class PromptGenerator:
-    """Create static and dynamic prompts for constrained decoding."""
+    """Create static and dynamic prompts for constrained decoding.
+
+    Provides templates for function-name selection, argument generation,
+    and construction of function-call prompts.
+    """
 
     class Builder:
-        """Fluent builder for constructing a prompt generator."""
+        """Build a configured PromptGenerator instance."""
+
         def __init__(
             self,
         ) -> None:
+            """Initialize an empty prompt generator builder.
+
+            Returns:
+                None.
+            """
             self.__functions_definitions: list[FunctionDefinitionModel]
             self.__prompts: list[PromptModel]
             self.__function_name_static_prompt: str
@@ -106,35 +120,36 @@ class PromptGenerator:
         def set_function_definitions(
             self, functions_definitions: list[FunctionDefinitionModel]
         ) -> Self:
-            """Store the available function definitions.
+            """Set the function definitions available to the generator.
 
             Args:
-                functions_definitions: Function schemas available to the model.
+                functions_definitions: Function definitions available to the model.
 
             Returns:
-                Self: The builder instance.
+                The builder instance.
             """
             self.__functions_definitions = functions_definitions
             return self
 
         def set_prompts(self, prompt: list[PromptModel]) -> Self:
-            """Store the prompts to be processed.
+            """Set the prompts to be processed.
 
             Args:
-                prompt: Prompt objects loaded from the input dataset.
+                prompt: Prompts loaded from the input dataset.
 
             Returns:
-                Self: The builder instance.
+                The builder instance.
             """
             self.__prompts = prompt
             return self
 
         def set_function_name_static_prompt(self) -> Self:
-            """Build the static prompt that instructs the model to choose a function name.
+            """Build the static prompt used for function-name generation.
 
             Returns:
-                Self: The builder instance.
+                The builder instance.
             """
+
             def __get_fns_def() -> str:
                 function_info: list[dict[str, str]] = list()
                 for fn_def in self.__functions_definitions:
@@ -154,7 +169,7 @@ class PromptGenerator:
             """Build the static prompt used for argument generation.
 
             Returns:
-                Self: The builder instance.
+                The builder instance.
             """
             self.__function_argument_static_prompt = (
                 PromptType.FUNCTION_ARGUMENT_STATIC.value
@@ -165,27 +180,55 @@ class PromptGenerator:
             """Create the configured prompt generator.
 
             Returns:
-                PromptGenerator: The assembled prompt generator.
+                A configured PromptGenerator instance.
             """
             return PromptGenerator(self)
 
         @property
         def functions_definitions(self) -> list[FunctionDefinitionModel]:
+            """Return the configured function definitions.
+
+            Returns:
+                The available function definitions.
+            """
             return self.__functions_definitions
 
         @property
         def function_name_static_prompt(self) -> str:
+            """Return the static function-name prompt.
+
+            Returns:
+                The configured static function-name prompt.
+            """
             return self.__function_name_static_prompt
 
         @property
         def function_argument_static_prompt(self) -> str:
+            """Return the static function-argument prompt.
+
+            Returns:
+                The configured static function-argument prompt.
+            """
             return self.__function_argument_static_prompt
 
         @property
         def prompts(self) -> list[PromptModel]:
+            """Return the configured prompts.
+
+            Returns:
+                The prompts to be processed.
+            """
             return self.__prompts
 
     def __init__(self, builder: Builder) -> None:
+        """Initialize the prompt generator from a builder.
+
+        Args:
+            builder: Builder containing the configured prompts and templates.
+
+        Returns:
+            None.
+        """
         self.__functions_defintion: list[FunctionDefinitionModel] = (
             builder.functions_definitions
         )
@@ -196,22 +239,22 @@ class PromptGenerator:
         )
 
     def iter_prompts(self) -> Generator[PromptModel]:
-        """Yield every prompt in order.
+        """Iterate over all configured prompts.
 
         Yields:
-            PromptModel: The next prompt to process.
+            The next prompt to process.
         """
         for prompt in self.prompts:
             yield prompt
 
     def function_name_dynamic_prompt(self, prompt: str) -> str:
-        """Create the user-specific prompt for choosing a function name.
+        """Create a dynamic prompt for function-name generation.
 
         Args:
-            prompt: User request text.
+            prompt: User request used to select a function.
 
         Returns:
-            str: Prompt text containing the request.
+            The generated dynamic prompt.
         """
         return PromptType.FUNCTION_NAME_DYNAMIC.value.replace("{USER_PROMPT}", prompt)
 
@@ -223,6 +266,18 @@ class PromptGenerator:
         arg_name: str,
         arg_type: str,
     ) -> str:
+        """Create a dynamic prompt for function-argument generation.
+
+        Args:
+            function_definition: Definition of the selected function.
+            user_prompt: User request used for argument generation.
+            generated_arguments: Arguments generated so far.
+            arg_name: Name of the argument currently being generated.
+            arg_type: Type of the argument currently being generated.
+
+        Returns:
+            The generated prompt for argument generation.
+        """
 
         def __format_the_function_prototype(function: FunctionDefinitionModel) -> str:
             res: str = f"{function.name}("
@@ -256,6 +311,19 @@ class PromptGenerator:
         arg_name: str,
         arg_type: str,
     ) -> str:
+        """Create the current function-call prompt.
+
+        Args:
+            user_prompt: User request associated with the function call.
+            function_definition: Definition of the selected function.
+            generated_arguments: Arguments generated so far.
+            arg_name: Name of the argument currently being generated.
+            arg_type: Type of the current argument.
+
+        Returns:
+            The function-call prompt containing the generated arguments.
+        """
+
         def __format_generated_argument(
             generated_argument: dict[str, str | float | bool],
             arg_name: str,
@@ -283,8 +351,18 @@ class PromptGenerator:
 
     @property
     def function_name_static_prompt(self) -> str:
+        """Return the static function-name prompt.
+
+        Returns:
+            The configured function-name prompt.
+        """
         return self.__function_name_static_prompt
 
     @property
     def function_argument_static_prompt(self) -> str:
+        """Return the static function-argument prompt.
+
+        Returns:
+            The configured function-argument prompt.
+        """
         return self.__function_arguments_static_prompt

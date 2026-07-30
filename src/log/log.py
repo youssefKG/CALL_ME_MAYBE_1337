@@ -9,7 +9,14 @@ import os
 
 
 class LogRow:
-    """Represents one row of progress information in the live log."""
+    """Represents one row of progress information in the live log.
+
+    Attributes:
+        id: Unique identifier for this log entry.
+        prompt: The user's input prompt text.
+        function_defintion: The selected function definition.
+        function_call: The generated function call.
+    """
     def __init__(
         self,
         id: str,
@@ -17,6 +24,14 @@ class LogRow:
         function_defintion: str = "",
         function_call: str = "",
     ) -> None:
+        """Initialize a log row with prompt and generation results.
+
+        Args:
+            id: Unique identifier for this row.
+            prompt: User's input prompt text.
+            function_defintion: Selected function definition (default "").
+            function_call: Generated function call (default "").
+        """
         self.prompt: str = prompt
         self.function_defintion: str = function_defintion
         self.function_call: str = function_call
@@ -24,13 +39,27 @@ class LogRow:
 
 
 class Log:
-    """Render a live table of prompt progress and generated function calls."""
+    """Render a live table of prompt progress and generated function calls.
+
+    Maintains a table showing the status of each prompt as it moves through
+    the generation pipeline. Updates the console display in real-time.
+    """
     def __init__(self) -> None:
+        """Initialize the log with empty state.
+
+        Attributes:
+            __console: Rich console for formatted output.
+            __rows: Mapping of prompt IDs to their log rows.
+        """
         self.__console: Console = Console()
         self.__rows: dict[str, LogRow] = dict()
 
     def __update(self) -> None:
-        """Refresh the console table with the latest rows."""
+        """Refresh the console table with the latest rows.
+
+        Clears the console and redisplays the table with the current state
+        of all rows using rich formatting.
+        """
         os.system("cls" if os.name == "nt" else "clear")
         table: Table = Table(title="CALL_ME_BABY", show_lines=True)
         table.add_column("Id", no_wrap=False, width=30)

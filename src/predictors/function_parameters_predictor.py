@@ -11,10 +11,10 @@ class StringState(str, Enum):
     Each state determines the valid characters or tokens for the next step.
     """
 
-    START = list('"')
-    ESCAPE = list("")
-    CONTENT = list("any")
-    FINAL = list(",")
+    START = '"'
+    ESCAPE = ""
+    CONTENT = "any"
+    FINAL = ","
 
 
 class NumberState(str, Enum):
@@ -24,22 +24,11 @@ class NumberState(str, Enum):
     through the optional fractional part to the final state.
     """
 
-    START = list("-+0123456789")
-    SIGN = list("0123456789")
-    INTEGER = list("0123456789.,")
-    FRACTION = list("0123456789,")
-    FINAL = list(",")
-
-
-class BooleanState(str, Enum):
-    """Define states used during constrained boolean generation.
-
-    The states restrict boolean values to the supported true and false
-    representations.
-    """
-
-    START = ["true", "false"]
-    FINAL = list(",")
+    START = "-+0123456789"
+    SIGN = "0123456789"
+    INTEGER = "0123456789.,"
+    FRACTION = "0123456789,"
+    FINAL = ","
 
 
 class FunctionParametersPredictor:
@@ -93,8 +82,8 @@ class FunctionParametersPredictor:
         return [self.__cache.get_token_id(ch) for ch in next_state.value]
 
     def next_state(
-        self, content: str, arg_type: Literal["number", "string", "boolean"]
-    ) -> NumberState | StringState | BooleanState:
+        self, content: str, arg_type: Literal["number", "string"]
+    ) -> NumberState | StringState:
         """Determine the current state for an argument.
 
         Args:
@@ -109,8 +98,6 @@ class FunctionParametersPredictor:
                 return self.__number_state(content)
             case "string":
                 return self.__string_state(content)
-            case "boolean":
-                return self.__boolean_state(content)
 
     def __number_state(self, num: str) -> NumberState:
         """Determine the state of a partially generated number.
@@ -153,21 +140,7 @@ class FunctionParametersPredictor:
                     ...
         return current_state
 
-    def __boolean_state(self, boolean_value: str) -> BooleanState:
-        """Determine the state of a partially generated boolean.
-
-        Args:
-            boolean_value: Current generated boolean content.
-
-        Returns:
-            The current boolean-generation state.
-        """
-        current_state: BooleanState = BooleanState.START
-        if boolean_value:
-            current_state = BooleanState.FINAL
-        return current_state
-
-    def __next_boolean_tokens_ids(self, boolean_value: str) -> list[int]:
+    def __next_boolean_tokens_ids(self, _: str) -> list[int]:
         """Get valid token IDs for the next boolean value.
 
         Args:
@@ -176,15 +149,10 @@ class FunctionParametersPredictor:
         Returns:
             A list of token IDs allowed by the current boolean state.
         """
-        current_state = self.__boolean_state(boolean_value)
-        match current_state:
-            case BooleanState.START:
-                return [
-                    self.__cache.get_token_id("true"),
-                    self.__cache.get_token_id("false"),
-                ]
-            case _:
-                return list()
+        return [
+            self.__cache.get_token_id("true"),
+            self.__cache.get_token_id("false"),
+        ]
 
     def __next_string_tokens_ids(self, content: str) -> list[int]:
         """Get valid token IDs for the next string character.

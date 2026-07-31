@@ -65,5 +65,5 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception as error:
+    except BaseException as error:
         print(error)

@@ -1,11 +1,10 @@
 UV := uv
 PYTHON := $(UV) run python
 PROJECT := src
-CACHE = ./*/__pycache__* .mypy_cache .flake8
 
 
-install:
-	$(UV) sync
+install: 
+	$(UV) sync --all-packages
 
 run:
 	$(PYTHON) -m $(PROJECT)
@@ -15,8 +14,9 @@ debug:
 
 
 clean:
-	find . -type d \( -name '__pycache__' -o -name '.mypy_cache' -o -name '.pytest_cache' -o -name '.ruff_cache' \) -prune -exec rm -rf {} +
-	rm -rf .venv .coverage build dist *.egg-info
+	find . -type d -name '__pycache__' -exec rm -rf {} +
+	find . -type d -name '.mypy_cache' -exec rm -rf {} +
+	rm -rf .venv *.egg-info
 
 lint:
 	$(UV) run flake8 $(PROJECT)

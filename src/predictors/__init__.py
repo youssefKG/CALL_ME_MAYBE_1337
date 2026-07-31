@@ -6,7 +6,6 @@ from .function_parameters_predictor import (
     FunctionParametersPredictor,
     NumberState,
     StringState,
-    BooleanState,
 )
 
 __all__ = [
@@ -14,6 +13,5 @@ __all__ = [
     "FunctionParametersPredictor",
     "NumberState",
     "StringState",
-    "BooleanState",
     "FunctionNameState",
 ]

@@ -88,7 +88,7 @@ class OutputGenerator:
             function_definition: FunctionDefinitionModel | None = (
                 self.__function_definition(prompt.prompt)
             )
-            if function_definition:
+            if function_definition is not None:
                 function_call: FunctionCallModel = FunctionCallModel(
                     name=function_definition.name,
                     prompt=prompt.prompt,
@@ -135,7 +135,12 @@ class OutputGenerator:
             prompt=prompt,
         )
         function_name_generator.generate()
-        return __get_function_definition(function_name_generator.fn_name)
+        function_definition: FunctionDefinitionModel | None = (
+            __get_function_definition(  # get function definition
+                function_name_generator.fn_name
+            )
+        )
+        return function_definition
 
     def __function_arguments(
         self, function_definition: FunctionDefinitionModel, prompt: PromptModel

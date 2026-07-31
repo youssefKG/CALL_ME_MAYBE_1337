@@ -1,4 +1,4 @@
-_This project has been created as part of the 42 curriculum by totib._
+_This project has been created as part of the 42 curriculum by ytaoussi._
 
 # CALL_ME_MAYBE_1337
 

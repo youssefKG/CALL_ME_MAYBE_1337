@@ -71,10 +71,10 @@ class FunctionNameGenerator:
                 )
             )
             token, token_id = self.__get_next_token(possible_tokens_ids)
+            self.__fn_name += token
             current_state = self.__function_name_predictor.function_name_state(
                 self.__fn_name
             )
-            self.__fn_name += token
             if current_state == FunctionNameState.FINAL or (
                 current_state == FunctionNameState.CONTENT
                 and len(self.__fn_name) >= len(self.__prompt)
@@ -92,7 +92,7 @@ class FunctionNameGenerator:
             self.__text_ids, high_score_ids
         )
         token_id: int = int(np.argmax(masked_logits))
-        token: str = self.__model.decode([token_id])
+        token: str = self.__model.decode_ids([token_id])
         return token, token_id
 
     def __init_text_ids(self) -> None:

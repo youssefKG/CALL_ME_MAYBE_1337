@@ -5,7 +5,6 @@ from src.predictors import (
     FunctionParametersPredictor,
     NumberState,
     StringState,
-    BooleanState,
 )
 from typing import cast, Literal
 from src.models import FunctionDefinitionModel, ArgumentType
@@ -122,26 +121,16 @@ class FunctionArgumentsGenerator:
         Returns:
             None.
         """
-        next_state: BooleanState
         possible_tokens_ids: list[int]
-        while True:
-            possible_tokens_ids = (
-                self.__function_parameters_predictor.next_tokens_ids(
-                    self.__generated_tokens, "boolean"
-                )
+        possible_tokens_ids = (
+            self.__function_parameters_predictor.next_tokens_ids(
+                self.__generated_tokens, "boolean"
             )
-            token, token_id = self.__get_next_token(possible_tokens_ids)
-            next_state = cast(
-                BooleanState,
-                self.__function_parameters_predictor.next_state(
-                    self.__generated_tokens, "boolean"
-                ),
-            )
-            if next_state == BooleanState.FINAL:
-                break
-            self.__generated_tokens += token
-            self.__text_ids.append(token_id)
-            self.__log_params(arg_name, "boolean")
+        )
+        token, token_id = self.__get_next_token(possible_tokens_ids)
+        self.__generated_tokens += token
+        self.__text_ids.append(token_id)
+        self.__log_params(arg_name, "boolean")
 
     def __generate_number(self, arg_name: str) -> None:
         """Generate a numeric argument using constrained decoding.
@@ -235,8 +224,8 @@ class FunctionArgumentsGenerator:
         masked_logits: list[float] = self.__model.get_masked_logits(
             self.__text_ids, high_score_tokens
         )
-        token_id: int = cast(int, np.argmax(masked_logits))
-        token: str = self.__model.decode([token_id])
+        token_id: int = int(np.argmax(masked_logits))
+        token: str = self.__model.decode_ids([token_id])
         return (token, token_id)
 
     def __prepare_next_argument(

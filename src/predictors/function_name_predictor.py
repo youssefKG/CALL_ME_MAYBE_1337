@@ -156,12 +156,17 @@ class FunctionNamePredictor:
                 return [self.__cache.get_token_id(",")]
             case FunctionNameState.ESCAPE:
                 return next_possible_tokens
-
-        next_possible_tokens.append(self.__cache.get_token_id('"'))
-        next_possible_tokens.append(self.__cache.get_token_id(","))
         return next_possible_tokens
 
     def function_name_state(self, function_name: str) -> FunctionNameState:
+        """Return function name state.
+
+        Args:
+            ids: generated function name.
+
+        Returns:
+            list[int]: function name state.
+        """
         function_name_state: FunctionNameState = FunctionNameState.START
         for ch in function_name:
             match function_name_state:

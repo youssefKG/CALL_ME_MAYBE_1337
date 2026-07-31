@@ -31,15 +31,8 @@ class PromptType(str, Enum):
 
     Rules:
     - Output valid JSON only.
-    - The object must contain exactly one key: "name".
     - The value must be the selected function name.
     - Do not add any other keys.
-    - Do not explain your choice.
-    - Do not include Markdown.
-    - If no function matches, return:
-      {
-        "name": null
-      }
 
     Available functions:
     {FUNCTIONS}
@@ -79,8 +72,8 @@ class PromptType(str, Enum):
     }
 
     Answer: {
-    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\"
-   with NUMBERS"
+    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" \
+            with NUMBERS"
     "name": "fn_substitute_string_with_regex",
     "parameters": {
         'source_string': "Hello 34 I'm 233 years old",

@@ -11,7 +11,7 @@ from typing import cast, Literal
 from src.models import FunctionDefinitionModel, ArgumentType
 from src.log import Log, LogRow
 from src.models import Argument
-from src.llm.model import Model
+from src.llm import Model
 from src.cache import Cache
 from collections.abc import Generator
 from src.prompts.prompt_generator import PromptGenerator
@@ -56,7 +56,9 @@ class FunctionArgumentsGenerator:
         self.__model: Model = model
         self.__function_arguments: Argument = dict()
         self.__user_prompt: PromptModel = user_prompt
-        self.__function_definition: FunctionDefinitionModel = function_definition
+        self.__function_definition: FunctionDefinitionModel = (
+            function_definition
+        )
         self.__cache: Cache = cache
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             function_parameters_predictor
@@ -123,8 +125,10 @@ class FunctionArgumentsGenerator:
         next_state: BooleanState
         possible_tokens_ids: list[int]
         while True:
-            possible_tokens_ids = self.__function_parameters_predictor.next_tokens_ids(
-                self.__generated_tokens, "boolean"
+            possible_tokens_ids = (
+                self.__function_parameters_predictor.next_tokens_ids(
+                    self.__generated_tokens, "boolean"
+                )
             )
             token, token_id = self.__get_next_token(possible_tokens_ids)
             next_state = cast(
@@ -166,7 +170,9 @@ class FunctionArgumentsGenerator:
             if current_state == NumberState.FINAL:
                 if "," in self.__generated_tokens:
                     semi_column_idx: int = self.__generated_tokens.rindex(",")
-                    self.__generated_tokens = self.__generated_tokens[:semi_column_idx]
+                    self.__generated_tokens = self.__generated_tokens[
+                        :semi_column_idx
+                    ]
                 break
             self.__text_ids.append(token_id)
             self.__log_params(
@@ -186,8 +192,10 @@ class FunctionArgumentsGenerator:
         possible_tokens: list[int]
         current_state: StringState
         while True:
-            possible_tokens = self.__function_parameters_predictor.next_tokens_ids(
-                self.__generated_tokens, "string"
+            possible_tokens = (
+                self.__function_parameters_predictor.next_tokens_ids(
+                    self.__generated_tokens, "string"
+                )
             )
             token, token_id = self.__get_next_token(possible_tokens)
             self.__generated_tokens += token
@@ -199,10 +207,13 @@ class FunctionArgumentsGenerator:
             )
             if current_state == StringState.FINAL or (
                 current_state == StringState.CONTENT
-                and len(self.__generated_tokens) >= len(self.__user_prompt.prompt)
+                and len(self.__generated_tokens)
+                >= len(self.__user_prompt.prompt)
             ):
                 if '"' in self.__generated_tokens:
-                    double_quotes_ids: int = self.__generated_tokens.rindex('"')
+                    double_quotes_ids: int = self.__generated_tokens.rindex(
+                        '"'
+                    )
                     self.__generated_tokens = self.__generated_tokens[
                         :double_quotes_ids
                     ]
@@ -210,7 +221,9 @@ class FunctionArgumentsGenerator:
             self.__text_ids.append(token_id)
             self.__log_params(arg_name, "string")
 
-    def __get_next_token(self, high_score_tokens: list[int]) -> tuple[str, int]:
+    def __get_next_token(
+        self, high_score_tokens: list[int]
+    ) -> tuple[str, int]:
         """Select the highest-scoring token from the allowed tokens.
 
         Args:
@@ -226,7 +239,9 @@ class FunctionArgumentsGenerator:
         token: str = self.__model.decode([token_id])
         return (token, token_id)
 
-    def __prepare_next_argument(self, arg_name: str, arg_type: ArgumentType) -> None:
+    def __prepare_next_argument(
+        self, arg_name: str, arg_type: ArgumentType
+    ) -> None:
         """Prepare the model input for the next argument.
 
         Args:
@@ -237,14 +252,18 @@ class FunctionArgumentsGenerator:
             None.
         """
         self.__text_ids = self.__cache.function_arguments_static_prompt_ids
-        dynamic_prompt: str = self.__prompt_generator.function_argument_dynamic_prompt(
-            self.__function_definition,
-            self.__user_prompt.prompt,
-            self.__function_arguments,
-            arg_name,
-            arg_type,
+        dynamic_prompt: str = (
+            self.__prompt_generator.function_argument_dynamic_prompt(
+                self.__function_definition,
+                self.__user_prompt.prompt,
+                self.__function_arguments,
+                arg_name,
+                arg_type,
+            )
         )
-        dynamic_prompt_ids: list[int] = self.__model.encode_text(dynamic_prompt)
+        dynamic_prompt_ids: list[int] = self.__model.encode_text(
+            dynamic_prompt
+        )
         self.__text_ids += dynamic_prompt_ids
 
     def __arg_iter(
@@ -276,7 +295,9 @@ class FunctionArgumentsGenerator:
             row=LogRow(
                 id=self.__user_prompt.id,
                 prompt=self.__user_prompt.prompt,
-                function_defintion=self.__function_definition.model_dump_json(indent=4),
+                function_defintion=self.__function_definition.model_dump_json(
+                    indent=4
+                ),
                 function_call=self.__prompt_generator.function_call_prompt(
                     self.__user_prompt.prompt,
                     self.__function_definition,

@@ -1,7 +1,7 @@
 """Generate valid function names using constrained decoding with a trie."""
 
-from src.predictors import FunctionNamePredictor
-from src.llm.model import Model
+from src.predictors import FunctionNamePredictor, FunctionNameState
+from src.llm import Model
 from src.prompts import PromptGenerator
 from src.cache.cache import Cache
 import numpy as np
@@ -46,11 +46,12 @@ class FunctionNameGenerator:
         """
         self.__model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
-        self.__function_name_predictor: FunctionNamePredictor = function_name_predictor
+        self.__function_name_predictor: FunctionNamePredictor = (
+            function_name_predictor
+        )
         self.__cache: Cache = cache
         self.__text_ids: list[int] = list()
         self.__generated_ids: list[int] = list()
-        self.__function_name_tokens: list[str] = list()
         self.__prompt: str = prompt
         self.__fn_name: str = ""
         self.__init_text_ids()
@@ -61,57 +62,49 @@ class FunctionNameGenerator:
         Uses the predictor to constrain next-token choices until the
         generated token sequence matches a complete known function name.
         """
+        current_state: FunctionNameState
+        possible_tokens_ids: list[int]
         while True:
-            self.__predict_next_token()
-            if self.__function_name_predictor.is_completed(self.__generated_ids):
-                break
-            possible_tokens_ids: list[int] = (
+            possible_tokens_ids = (
                 self.__function_name_predictor.get_next_predictions_ids(
-                    self.__generated_ids
+                    self.__generated_ids, self.__fn_name
                 )
             )
-            logits: list[float] = self.__model.get_masked_logits(
-                self.__text_ids, possible_tokens_ids
+            token, token_id = self.__get_next_token(possible_tokens_ids)
+            current_state = self.__function_name_predictor.function_name_state(
+                self.__fn_name
             )
-            high_score = np.argmax(logits)
-            self.__add_next_token_id(int(high_score))
-        self.__fn_name = "".join(self.__function_name_tokens)
+            self.__fn_name += token
+            if current_state == FunctionNameState.FINAL or (
+                current_state == FunctionNameState.CONTENT
+                and len(self.__fn_name) >= len(self.__prompt)
+            ):
+                if '"' in self.__fn_name:
+                    double_quotes_idx: int = self.__fn_name.rindex('"')
+                    self.__fn_name = self.__fn_name[:double_quotes_idx]
+                break
+            self.__text_ids.append(token_id)
+            self.__generated_ids.append(token_id)
 
-    def __add_next_token_id(self, id: int) -> None:
-        """Append a generated token ID and its decoded token text.
+    def __get_next_token(self, high_score_ids: list[int]) -> tuple[str, int]:
 
-        Args:
-            id: Token ID selected by the decoder.
-        """
-        self.__generated_ids.append(id)
-        self.__text_ids.append(id)
-        token: str = self.__model.decode([id])
-        self.__function_name_tokens.append(token)
+        masked_logits: list[float] = self.__model.get_masked_logits(
+            self.__text_ids, high_score_ids
+        )
+        token_id: int = int(np.argmax(masked_logits))
+        token: str = self.__model.decode([token_id])
+        return token, token_id
 
     def __init_text_ids(self) -> None:
         """Initialize the token buffer with static and dynamic prompts."""
         self.__text_ids = (
             self.__cache.function_name_static_prompt_ids
             + self.__model.encode_text(
-                self.__prompt_generator.function_name_dynamic_prompt(self.__prompt)
-            )
-        )
-
-    def __predict_next_token(self) -> None:
-        """Consume any forced tokens until a branching prediction is needed."""
-        next_predicted_ids: list[int] = (
-            self.__function_name_predictor.get_next_predictions_ids(
-                self.__generated_ids
-            )
-        )
-        while len(next_predicted_ids) == 1:
-            next_token_id: int = next_predicted_ids[0]
-            self.__add_next_token_id(next_token_id)
-            next_predicted_ids = (
-                self.__function_name_predictor.get_next_predictions_ids(
-                    self.__generated_ids
+                self.__prompt_generator.function_name_dynamic_prompt(
+                    self.__prompt
                 )
             )
+        )
 
     @property
     def fn_name(self) -> str:

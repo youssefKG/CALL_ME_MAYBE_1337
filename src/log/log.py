@@ -17,6 +17,7 @@ class LogRow:
         function_defintion: The selected function definition.
         function_call: The generated function call.
     """
+
     def __init__(
         self,
         id: str,
@@ -44,6 +45,7 @@ class Log:
     Maintains a table showing the status of each prompt as it moves through
     the generation pipeline. Updates the console display in real-time.
     """
+
     def __init__(self) -> None:
         """Initialize the log with empty state.
 

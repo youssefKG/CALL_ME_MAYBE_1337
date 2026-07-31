@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Literal
 
 
-class StringState(list[str], Enum):
+class StringState(str, Enum):
     """Define states used during constrained string generation.
 
     Each state determines the valid characters or tokens for the next step.
@@ -17,7 +17,7 @@ class StringState(list[str], Enum):
     FINAL = list(",")
 
 
-class NumberState(list[str], Enum):
+class NumberState(str, Enum):
     """Define states used during constrained number generation.
 
     The states represent the progression from the initial sign and digits
@@ -31,7 +31,7 @@ class NumberState(list[str], Enum):
     FINAL = list(",")
 
 
-class BooleanState(list[str], Enum):
+class BooleanState(str, Enum):
     """Define states used during constrained boolean generation.
 
     The states restrict boolean values to the supported true and false

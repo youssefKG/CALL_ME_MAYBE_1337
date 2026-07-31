@@ -11,10 +11,12 @@ from src.models import (
 )
 from src.log import Log, LogRow
 from src.predictors import FunctionParametersPredictor, FunctionNamePredictor
-from src.llm.model import Model
+from src.llm import Model
 from src.prompts.prompt_generator import PromptGenerator
 from src.generator.function_name_generator import FunctionNameGenerator
-from src.generator.function_parametre_generator import FunctionArgumentsGenerator
+from src.generator.function_parametre_generator import (
+    FunctionArgumentsGenerator,
+)
 from src.cache import Cache
 
 
@@ -44,7 +46,8 @@ class OutputGenerator:
             model: Language model used for function generation.
             log: Logger used to record the generation process.
             remaining_prompts: Prompts that still need to be processed.
-            generated_functions_call: List used to store generated function calls.
+            generated_functions_call: List used to store generated
+            function calls.
             functions_definitions: Available function definitions.
             prompt_generator: Generator used to create model prompts.
             output_path: Path to the output JSON file.
@@ -59,7 +62,9 @@ class OutputGenerator:
         self.__model: Model = model
         self.__prompt_generator: PromptGenerator = prompt_generator
         self.__remaining_prompts: list[PromptModel] = remaining_prompts
-        self.__functions_calls: list[FunctionCallModel] = generated_functions_call
+        self.__functions_calls: list[FunctionCallModel] = (
+            generated_functions_call  # init function_calls
+        )
         self.__function_name_predictor: FunctionNamePredictor
         self.__function_parameters_predictor: FunctionParametersPredictor = (
             FunctionParametersPredictor(cache=cache)
@@ -87,7 +92,9 @@ class OutputGenerator:
                 function_call: FunctionCallModel = FunctionCallModel(
                     name=function_definition.name,
                     prompt=prompt.prompt,
-                    parameters=self.__function_arguments(function_definition, prompt),
+                    parameters=self.__function_arguments(
+                        function_definition, prompt
+                    ),  # init the constructor for function call model
                 )
                 self.__functions_calls.append(function_call)
                 self.__log.add_row(
@@ -100,7 +107,9 @@ class OutputGenerator:
                 )
             self.__generate_output_file()
 
-    def __function_definition(self, prompt: str) -> FunctionDefinitionModel | None:
+    def __function_definition(
+        self, prompt: str
+    ) -> FunctionDefinitionModel | None:  # function defintion
         """Find the function definition matching a user prompt.
 
         Args:
@@ -134,7 +143,8 @@ class OutputGenerator:
         """Generate arguments for a function definition.
 
         Args:
-            function_definition: Function definition whose arguments are generated.
+            function_definition: Function definition
+            whose arguments are generated.
             prompt: User prompt used for argument generation.
 
         Returns:
@@ -162,7 +172,9 @@ class OutputGenerator:
         fns_def_names_ids: list[list[int]] = list()
         for fn_def in self.__functions_definitions:
             fns_def_names_ids.append(self.__model.encode_text(fn_def.name))
-        self.__function_name_predictor.set_fns_names_ids_trie(fns_def_names_ids)
+        self.__function_name_predictor.set_fns_names_ids_trie(
+            fns_def_names_ids
+        )  # init function names ids in tree
 
     @property
     def functions_calls(self) -> list[FunctionCallModel]:

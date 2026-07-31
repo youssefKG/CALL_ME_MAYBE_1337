@@ -1,4 +1,5 @@
-"""Parse CLI arguments, prompts, and function definitions for the generation pipeline."""
+"""Parse CLI arguments, prompts,
+and function definitions for the generation pipeline."""
 
 from pathlib import Path
 
@@ -74,7 +75,8 @@ class Parser:
             self.__function_defintions = function_definions_validator.root
         except ValidationError as error:
             print(
-                f"Validation Error({self.__args_parser.get_functions_definition_file}):\n",
+                "Validation Error",
+                f"({self.__args_parser.get_functions_definition_file}):\n",
                 f"{error.errors()[0]['msg']}",
             )
             sys.exit(1)
@@ -105,7 +107,7 @@ class Parser:
         try:
             prompts_validator = PromptsRootModel.model_validate_json(
                 input_file_content
-            )
+            )  # validate prompts
             self.__prompts = prompts_validator.root
         except ValidationError as error:
             print(

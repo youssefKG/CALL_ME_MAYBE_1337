@@ -182,3 +182,5 @@ https://mbrenndoerfer.com/writing/hallucination-mitigation
 ### soft max:
 
 https://mbrenndoerfer.com/writing/decoding-temperature-language-model-generation
+
+

@@ -8,6 +8,9 @@ from collections.abc import Generator
 
 import json
 
+""" You are a function selector.
+"""
+
 
 class PromptType(str, Enum):
     """Define the prompt templates used by the generation pipeline.
@@ -16,22 +19,35 @@ class PromptType(str, Enum):
     """
 
     FUNCTIONS_NAME_STATIC = """
-    Instructions:
+    You are a function selector.
+
+    Task:
     - Read the available function definitions.
     - Select the single function that best matches the user's request.
-    - Return ONLY the function name.
-    - Do not explain.
-    - Do not repeat the user request.
-    - If the best function is fn_add_numbers, output exactly: fn_add_numbers
-    - Do NOT output anything else.
+    - Return a JSON object with exactly one field:
+      {
+        "name": "<function_name>"
+      }
 
-    Functions:
+    Rules:
+    - Output valid JSON only.
+    - The object must contain exactly one key: "name".
+    - The value must be the selected function name.
+    - Do not add any other keys.
+    - Do not explain your choice.
+    - Do not include Markdown.
+    - If no function matches, return:
+      {
+        "name": null
+      }
+
+    Available functions:
     {FUNCTIONS}
     """
 
     FUNCTION_NAME_DYNAMIC = """
     User request: {USER_PROMPT}
-    Answer: """
+    Answer: {"name":\""""
 
     FUNCTION_ARGUMENT_STATIC = """
     <|im_start|>
@@ -63,7 +79,8 @@ class PromptType(str, Enum):
     }
 
     Answer: {
-    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\" with NUMBERS"
+    "prompt": "Replace all numbers in \"Hello 34 I'm 233 years old\"
+   with NUMBERS"
     "name": "fn_substitute_string_with_regex",
     "parameters": {
         'source_string': "Hello 34 I'm 233 years old",
@@ -123,7 +140,8 @@ class PromptGenerator:
             """Set the function definitions available to the generator.
 
             Args:
-                functions_definitions: Function definitions available to the model.
+                functions_definitions: Function definitions
+                available to the model.
 
             Returns:
                 The builder instance.
@@ -154,7 +172,10 @@ class PromptGenerator:
                 function_info: list[dict[str, str]] = list()
                 for fn_def in self.__functions_definitions:
                     function_info.append(
-                        {"name": fn_def.name, "descritption": fn_def.description}
+                        {
+                            "name": fn_def.name,
+                            "descritption": fn_def.description,
+                        }
                     )
                 return json.dumps(function_info)
 
@@ -233,7 +254,9 @@ class PromptGenerator:
             builder.functions_definitions
         )
         self.prompts: list[PromptModel] = builder.prompts
-        self.__function_name_static_prompt: str = builder.function_name_static_prompt
+        self.__function_name_static_prompt: str = (
+            builder.function_name_static_prompt
+        )  # get function name static prompt from builder
         self.__function_arguments_static_prompt: str = (
             builder.function_argument_static_prompt
         )
@@ -256,7 +279,9 @@ class PromptGenerator:
         Returns:
             The generated dynamic prompt.
         """
-        return PromptType.FUNCTION_NAME_DYNAMIC.value.replace("{USER_PROMPT}", prompt)
+        return PromptType.FUNCTION_NAME_DYNAMIC.value.replace(
+            "{USER_PROMPT}", prompt
+        )  # dynamic prompt
 
     def function_argument_dynamic_prompt(
         self,
@@ -279,7 +304,9 @@ class PromptGenerator:
             The generated prompt for argument generation.
         """
 
-        def __format_the_function_prototype(function: FunctionDefinitionModel) -> str:
+        def __format_the_function_prototype(
+            function: FunctionDefinitionModel,
+        ) -> str:
             res: str = f"{function.name}("
             idx: int = 0
             function_params_len: int = len(function.parameters.items())
@@ -292,13 +319,18 @@ class PromptGenerator:
 
         function_argument_description: str = (
             PromptType.FUNCTION_ARGUMENET_DYNAMIC.value.replace(
-                "{FUNCTION}", __format_the_function_prototype(function_definition)
+                "{FUNCTION}",
+                __format_the_function_prototype(function_definition),
             )
             .replace("{FUNCTION_DESCRIPTION}", function_definition.description)
             .replace("{USER_PROMPT}", user_prompt)
         )
         function_call: str = self.function_call_prompt(
-            user_prompt, function_definition, generated_arguments, arg_name, arg_type
+            user_prompt,
+            function_definition,
+            generated_arguments,
+            arg_name,
+            arg_type,
         )
 
         return function_argument_description + function_call
@@ -332,7 +364,8 @@ class PromptGenerator:
             res: str = str()
             for name, value in generated_argument.items():
                 res += '"{NAME}": "{VALUE}", '.replace("{NAME}", name).replace(
-                    "{VALUE}" if isinstance(value, str) else '"{VALUE}"', str(value)
+                    "{VALUE}" if isinstance(value, str) else '"{VALUE}"',
+                    str(value),
                 )
 
             res += '"{NAME}": {VALUE}'.replace("{NAME}", arg_name).replace(
@@ -341,11 +374,15 @@ class PromptGenerator:
             return res
 
         return (
-            PromptType.FUNCTION_CALL.value.replace("{USER_PROMPT}", user_prompt)
+            PromptType.FUNCTION_CALL.value.replace(
+                "{USER_PROMPT}", user_prompt
+            )  # function call prompt
             .replace("{FUNCTION_NAME}", function_definition.name)
             .replace(
                 "{GENERATED_ARGUMENTS}",
-                __format_generated_argument(generated_arguments, arg_name, arg_type),
+                __format_generated_argument(
+                    generated_arguments, arg_name, arg_type
+                ),  # set generated argumenet in function call prompt
             )
         )
 

@@ -78,14 +78,18 @@ class ErrorRecovery:
         for prompt, function_call in zip(
             self.__prompts, self.__generated_functions_call
         ):
-            function_defintion = self.__get_function_definition_from_function_call(
+            function_defintion = self.__get_function_defintion(
+                # get function_definition based on function call name
                 function_call.name
             )
             if any(
                 [
                     prompt.prompt != function_call.prompt,
                     function_defintion is None
-                    or not self.__is_valid_arguments(function_call, function_defintion),
+                    or not self.__is_valid_arguments(
+                        function_call, function_defintion
+                    ),  # check argument on function call
+                    # if there are the same as function defintion
                 ]
             ):
                 self.__set_default()
@@ -103,11 +107,13 @@ class ErrorRecovery:
         function calls. Raises ValidationError if the JSON is malformed.
         """
         functions_call_content: str = Path(self.__output_path).read_text()
-        self.__generated_functions_call = FunctionCallRootModel.model_validate_json(
-            functions_call_content
-        ).root
+        self.__generated_functions_call = (
+            FunctionCallRootModel.model_validate_json(  # check function call
+                functions_call_content
+            ).root
+        )
 
-    def __get_function_definition_from_function_call(
+    def __get_function_defintion(
         self, function_call_name: str
     ) -> FunctionDefinitionModel | None:
         """Find the function definition matching a function call name.
@@ -129,7 +135,7 @@ class ErrorRecovery:
 
     def __is_valid_arguments(
         self,
-        function_call: FunctionCallModel,
+        fn_call: FunctionCallModel,
         function_definition: FunctionDefinitionModel | None,
     ) -> bool:
         """Check if function call arguments match the function definition.
@@ -146,23 +152,23 @@ class ErrorRecovery:
         """
         if function_definition:
             for arg_name, arg_type in function_definition.parameters.items():
-                if arg_name not in function_call.parameters.keys():
+                if arg_name not in fn_call.parameters.keys():
                     return False
                 match arg_type.type:
                     case "string":
-                        if not isinstance(function_call.parameters[arg_name], str):
+                        if not isinstance(fn_call.parameters[arg_name], str):
                             return False
                     case "integer":
-                        if not isinstance(function_call.parameters[arg_name], int):
+                        if not isinstance(fn_call.parameters[arg_name], int):
                             return False
                     case "boolean":
-                        if not isinstance(function_call.parameters[arg_name], bool):
+                        if not isinstance(fn_call.parameters[arg_name], bool):
                             return False
                     case "number":
-                        if not isinstance(function_call.parameters[arg_name], float):
+                        if not isinstance(fn_call.parameters[arg_name], float):
                             return False
                     case "float":
-                        if not isinstance(function_call.parameters[arg_name], float):
+                        if not isinstance(fn_call.parameters[arg_name], float):
                             return False
         return True
 
@@ -213,7 +219,7 @@ class ErrorRecovery:
             self.__prompts, self.__generated_functions_call
         ):
             function_definition: FunctionDefinitionModel | None = (
-                self.__get_function_definition_from_function_call(function_call.name)
+                self.__get_function_defintion(function_call.name)
             )
             if function_definition:
                 self.__log.add_row(

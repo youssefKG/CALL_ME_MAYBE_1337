@@ -1,6 +1,6 @@
 """Predictors for constraining names and arguments during generation."""
 
-from .function_name_predictor import FunctionNamePredictor
+from .function_name_predictor import FunctionNamePredictor, FunctionNameState
 
 from .function_parameters_predictor import (
     FunctionParametersPredictor,
@@ -15,4 +15,5 @@ __all__ = [
     "NumberState",
     "StringState",
     "BooleanState",
+    "FunctionNameState",
 ]

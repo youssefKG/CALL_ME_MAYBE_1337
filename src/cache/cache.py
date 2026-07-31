@@ -1,17 +1,20 @@
 """Cache token IDs and static prompt IDs for repeated decoding steps."""
 
 from typing_extensions import Self
-from src.llm.model import Model
-import src.constants.constants as constants
+from src.llm import Model
+import src.constants as constants
 
 
 class Cache:
-    """Singleton cache for token IDs and prompt prefixes used during generation."""
+    """Singleton cache for token IDs and prompt
+    prefixes used during generation.
+    """
 
     __instance: Self | None = None
 
     class Builder:
-        """Fluent builder for populating the cache with model-dependent values."""
+        """Fluent builder for populating
+        the cache with model-dependent values."""
 
         def __init__(self) -> None:
             """Initialize the builder with empty state.
@@ -71,6 +74,7 @@ class Cache:
             __encode_list(constants.NUMBERS)
             __encode_list(constants.CHAT_TEMPLATES)
             __encode_list(constants.BOOLEANS)
+            __encode_list(constants.OTHERS)
             return self
 
         def set_function_name_static_prompt(self, prompt: str) -> Self:

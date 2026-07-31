@@ -2,9 +2,10 @@
 
 from typing import Literal, TypeAlias, Annotated
 from pydantic import BaseModel, RootModel, StringConstraints
-from pydantic import ConfigDict
 
-ArgumentType: TypeAlias = Literal["string", "number", "boolean", "float", "integer"]
+ArgumentType: TypeAlias = Literal[
+    "string", "number", "boolean", "float", "integer"
+]  # alias to argument types
 
 
 class TypeSpec(BaseModel):
@@ -16,8 +17,11 @@ class TypeSpec(BaseModel):
     Attributes:
         type: One of the supported argument types.
     """
+
     type: ArgumentType
-    model_config: ConfigDict = ConfigDict(extra="forbid")
+
+    class Config:
+        extra: str = "forbid"
 
 
 class FunctionDefinitionModel(BaseModel):
@@ -32,11 +36,18 @@ class FunctionDefinitionModel(BaseModel):
         parameters: Mapping of parameter names to their type specifications.
         returns: The type specification for the function's return value.
     """
-    name: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    description: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+
+    name: Annotated[
+        str, StringConstraints(min_length=1, strip_whitespace=True)
+    ]  # name validation
+    description: Annotated[
+        str, StringConstraints(min_length=1, strip_whitespace=True)
+    ]  # description validation
     parameters: dict[str, TypeSpec]
     returns: TypeSpec
-    model_config: ConfigDict = ConfigDict(extra="forbid")
+
+    class Config:
+        extra: str = "forbid"
 
 
 class FunctionsDefinitionRootModel(RootModel[list[FunctionDefinitionModel]]):
@@ -45,4 +56,5 @@ class FunctionsDefinitionRootModel(RootModel[list[FunctionDefinitionModel]]):
     Wraps a list of FunctionDefinitionModel objects for convenient JSON
     parsing and validation via Pydantic.
     """
+
     pass

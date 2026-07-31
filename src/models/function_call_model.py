@@ -18,9 +18,17 @@ class FunctionCallModel(BaseModel):
         prompt: The user prompt that generated this call (non-empty).
         parameters: Mapping of parameter names to their values.
     """
-    name: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    prompt: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+
+    name: Annotated[
+        str, StringConstraints(min_length=1, strip_whitespace=True)
+    ]  # name validation
+    prompt: Annotated[
+        str, StringConstraints(min_length=1, strip_whitespace=True)
+    ]  # prompt validation
     parameters: Argument
+
+    class Config:
+        extra = "forbid"
 
 
 class FunctionCallRootModel(RootModel[list[FunctionCallModel]]):
@@ -29,4 +37,5 @@ class FunctionCallRootModel(RootModel[list[FunctionCallModel]]):
     Wraps a list of FunctionCallModel objects for convenient JSON parsing
     and validation via Pydantic.
     """
+
     pass

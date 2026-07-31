@@ -10,6 +10,7 @@ class Singleton:
     of subclasses across the entire runtime. Subclasses inherit this
     behavior automatically.
     """
+
     __instance: Self | None = None
 
     def __new__(cls) -> Self:

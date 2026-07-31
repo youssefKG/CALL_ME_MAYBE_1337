@@ -9,6 +9,7 @@ class FileError(Exception):
     This exception is raised when file validation checks fail, indicating
     that a file cannot be accessed for reading, writing, or verification.
     """
+
     pass
 
 

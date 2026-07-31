@@ -1,6 +1,14 @@
 """Predict valid function-name continuations using a trie over token IDs."""
 
 from src.cache.cache import Cache
+from enum import Enum, auto
+
+
+class FunctionNameState(Enum):
+    START = auto()
+    CONTENT = auto()
+    ESCAPE = auto()
+    FINAL = auto()
 
 
 class TrieNode:
@@ -30,7 +38,7 @@ class Trie:
     validate and predict valid next tokens during constrained decoding.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the trie with an empty root node."""
         self.root_node: TrieNode = TrieNode()
 
@@ -119,7 +127,9 @@ class FunctionNamePredictor:
         for fn_ids in fns_names_ids:
             self.__fns_names_ids_trie.add(fn_ids)
 
-    def get_next_predictions_ids(self, ids: list[int]) -> list[int]:
+    def get_next_predictions_ids(
+        self, ids: list[int], generated_function_name: str
+    ) -> list[int]:
         """Return the next allowed token IDs for a prefix.
 
         Queries the trie to get valid continuation tokens for the current
@@ -134,7 +144,40 @@ class FunctionNamePredictor:
         next_possible_tokens: list[int] = (
             self.__fns_names_ids_trie.get_children(ids)
         )
+        function_name_state: FunctionNameState = self.function_name_state(
+            generated_function_name
+        )
+        match function_name_state:
+            case FunctionNameState.START:
+                next_possible_tokens.append(self.__cache.get_token_id('"'))
+            case FunctionNameState.CONTENT:
+                next_possible_tokens.append(self.__cache.get_token_id('"'))
+            case FunctionNameState.FINAL:
+                return [self.__cache.get_token_id(",")]
+            case FunctionNameState.ESCAPE:
+                return next_possible_tokens
+
+        next_possible_tokens.append(self.__cache.get_token_id('"'))
+        next_possible_tokens.append(self.__cache.get_token_id(","))
         return next_possible_tokens
+
+    def function_name_state(self, function_name: str) -> FunctionNameState:
+        function_name_state: FunctionNameState = FunctionNameState.START
+        for ch in function_name:
+            match function_name_state:
+                case FunctionNameState.START:
+                    function_name_state = FunctionNameState.CONTENT
+                case FunctionNameState.CONTENT:
+                    if ch == '"':
+                        function_name_state = FunctionNameState.FINAL
+                    if ch == "\\":
+                        function_name_state = FunctionNameState.ESCAPE
+                case FunctionNameState.ESCAPE:
+                    function_name_state = FunctionNameState.CONTENT
+                case FunctionNameState.FINAL:
+                    pass
+
+        return function_name_state
 
     def is_completed(self, ids: list[int]) -> bool:
         """Check whether the current prefix is a completed function name.

@@ -9,18 +9,23 @@ import os
 
 class ArgsError(Exception):
     """Raised when the command-line arguments are invalid or incomplete."""
+
     pass
 
 
 class DefaultFilePath(str, Enum):
-    """Default input and output file paths used when the user omits CLI arguments."""
+    """Default input and output file paths
+    used when the user omits CLI arguments."""
+
     PROMPT_PATH = "data/input/function_calling_tests.json"
     FUNCTION_DEFINITION_PATH = "data/input/functions_definition.json"
     FUNCTION_CALL_PATH = "data/input/output/function_calls.json"
 
 
 class ArgsParser:
-    """Parse CLI options for input, output, function definitions, and model selection."""
+    """Parse CLI options for input, output,
+    function definitions, and model selection."""
+
     def __init__(self, args: list[str]) -> None:
         """Initialize the parser with the raw CLI argument list.
 
@@ -49,7 +54,9 @@ class ArgsParser:
             idx += 2
         self.__set_default_values()
 
-    def __set_arg_value(self, option: str, arg_value: str | None = None) -> None:
+    def __set_arg_value(
+        self, option: str, arg_value: str | None = None
+    ) -> None:  # set argument
         """Route a parsed option to its corresponding setter.
 
         Args:
@@ -69,7 +76,8 @@ class ArgsParser:
                 self.__raise_unknown_option(option)
 
     def __set_functions_definition_file(
-        self, file_path: str | None = DefaultFilePath.FUNCTION_DEFINITION_PATH.value
+        self,
+        file_path: str | None = DefaultFilePath.FUNCTION_DEFINITION_PATH.value,
     ) -> None:
         """Store and validate the path to the function-definition JSON file.
 
@@ -82,7 +90,9 @@ class ArgsParser:
         FileChecker.check_file_path_is_exist(
             cast(str, self.__functions_definition_file)
         )
-        FileChecker.check_file_is_readable(cast(str, self.__functions_definition_file))
+        FileChecker.check_file_is_readable(
+            cast(str, self.__functions_definition_file)
+        )  # check file is readable
         self.__functions_definition_file = file_path
 
     def __set_output_file(

@@ -83,10 +83,12 @@ class Model(Small_LLM_Model):
 
         Args:
             text_ids: Token IDs used as model input.
-            hight_score_ids: Token IDs allowed during the current decoding step.
+            hight_score_ids: Token IDs allowed during
+            the current decoding step.
 
         Returns:
-            A list of logits where disallowed token scores are negative infinity.
+            A list of logits where disallowed
+            token scores are negative infinity.
         """
         logits: list[float] = self.get_logits(text_ids)
         if hight_score_ids:

@@ -2,7 +2,7 @@
 
 from src.error_recovery.error_recovery import ErrorRecovery
 from src.parser import Parser
-from src.llm.model import Model
+from src.llm import Model
 from src.generator import OutputGenerator
 from src.cache import Cache
 from src.prompts import PromptGenerator
@@ -40,7 +40,9 @@ def main() -> None:
     cache: Cache = (
         Cache.Builder()
         .set_model(model)
-        .set_function_name_static_prompt(prompt_generator.function_name_static_prompt)
+        .set_function_name_static_prompt(
+            prompt_generator.function_name_static_prompt
+        )  # set function_name static prompt
         .set_tokens_ids()
         .set_function_argument_static_prompt(
             prompt_generator.function_argument_static_prompt

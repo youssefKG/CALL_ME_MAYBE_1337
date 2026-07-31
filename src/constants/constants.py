@@ -46,3 +46,5 @@ NUMBERS = [
 ]
 
 BOOLEANS = ["true", "false"]
+
+OTHERS = ['"', ","]
